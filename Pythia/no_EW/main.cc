@@ -210,32 +210,6 @@ bool interact(int& id, Vec4& p4Vec, Event& event){
   hadPythia.event.append(id,   91, 0, 0, 0., 0., qP, qE, m);
   hadPythia.next();
 
-  /*
-  if(DEBUG) hadPythia.event.list();
-  double Ef;
-  double fraction;
-  for (int j=0;j<hadPythia.event.size();++j){
-    if(hadPythia.event[j].isFinal()){
-      int id_product = hadPythia.event[j].id();
-      if (isBMeson(id_product) || isBBaryon(id_product)){ 
-        Ef = hadPythia.event[j].e();
-        prettyPrint("Ef",Ef);
-        fraction = Ef/Ei;	
-        prettyPrint("fraction",fraction);
-        transfer_b.fill(fraction);
-      }
-      else if (isDMeson(id_product) || isCBaryon(id_product)){
-        Ef = hadPythia.event[j].e();
-        fraction = Ef/Ei;
-        prettyPrint("Ef",Ef);
-        prettyPrint("fraction",fraction);
-
-        transfer_c.fill(fraction);
-      }
-    }
-  }
-
-  */
   event = hadPythia.event;
   if (DEBUG) event.list();
 
@@ -292,14 +266,12 @@ bool interDecay(int& id, Vec4& p4Vec, double inWeight=1.){
     assert(0);
   }
 
-  double rho = 150.; //sun center density 150g/cm3
+  double rho = 148.9; //sun center density 148.9 g/cm3
   double N   = 6.0221409e23;
   prettyPrint("rho",  rho);
   prettyPrint("N",  N);
   prettyPrint("xSec",  xSec);
   interLength  = 1./(rho*N*xSec*1e-26*beta)*10.; //mm/c
-  //double interLength = 10.49 / (xSec * beta); // mm/c
-  //double interLength = 9.03 / (xSec * beta); // mm/c
 
   double epsilon = 1e-6;
   if (inWeight < epsilon) return true;
@@ -416,7 +388,8 @@ int main(int argc, char** argv) {
   
   // Read in the rest of the settings and data from a separate file.
   
-  pythia.readFile("channel.cmnd");
+  //pythia.readFile("channel.cmnd");
+  pythia.readFile(channel+"_"+std::to_string(int(xMaxIn))+".cmnd");
   pythia.readFile("decays.cmnd");
   hadPythia.readFile("decays.cmnd");
   // Intialize hadronization Pythia object.
