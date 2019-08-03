@@ -1,4 +1,5 @@
 #author : Q.R. Liu
+#update date: Aug 3 2019
 
 import os
 import numpy as np
@@ -7,21 +8,15 @@ import scipy.special as spe
 import scipy.interpolate as interpolate
 from sympy.solvers import solve
 from sympy import Symbol
-# my modules
-import neutrinocommon
-import neutrinocommon.neu.xsections as xs
-import neutrinocommon.physconst.physicsconstants as PC
-import neutrinocommon.neu.neuosc as no
-import neutrinocommon.astro.body as bd
-import neutrinocommon.exp.icecube as ice
-import neutrinocommon.tools.generaltools as gt
+
+import physicsconstants as PC
 import nuSQUIDSpy as nsq
 import nuSQUIDSTools
-import DM
+#import DM
 
 pc = PC.PhysicsConstants()
 
-datDMFluxSweden = '/data/user/qliu/DM/dat-wa/'
+datDMFluxSweden = '/data/user/qliu/DM/wimpsim-4.1.2/scr/ann_run/dat-wa/'
 #wimpsim channels
 
 ch_wimpsim = {'dd':1,'uu':2,'ss':3,'cc':4,'bb':5,'tt':5,'gg':7,'ww':8,'ZZ':9,'mumu':10,'tautau':11,'nuenue':12,'numunumu':13,'nutaunutau':14}
@@ -59,8 +54,8 @@ def DMSweFlux(Enu,neuflavor,ch,DMm,location = 'SunCtr'):
         DMmstring = format(DMm,'.0f')
         filename = "wa-m"+str(DMmstring)+"-ch"+str(ch_wimpsim[ch])+"-sun-sum.dat"
         file = open(datDMFluxSweden + filename,'r')
-        z=np.linspace(0.0,1.,200,endpoint=False)
-        #h,dat = gt.hreadfilev2(file)
+        z    = np.linspace(0.0,1.,201)
+	z    = (z[1:]+z[:-1])/2.
 	if location == 'SunCtr':
 		line = neuflavor
 	elif location == 'SunSrfc':
@@ -74,15 +69,7 @@ def DMSweFlux(Enu,neuflavor,ch,DMm,location = 'SunCtr'):
 	else:
 		print "No such annihilation location"
 		quit()
-	#print location
 	dn_dz =  np.genfromtxt(file)[line,:]
-	#xneuflavor=neuflavor
-        #if AtEarth:
-        #    xneuflavor+=12
-        #dn_dz = dat[xneuflavor]
-        #print dat
-        
-        #PC.act_channel, PC.act_DM_mass, PC.act_neuflavor,PC.flag_inter = ch,DMm,neuflavor,'SunCtr'
         
         if Enu/DMm < z[0]:
             return 0.0
@@ -129,7 +116,7 @@ class DM_distribution():
         """
         return DMSweFlux(Enu,self.flavor,self.ch,self.DMm,location)#/self.DMm
 
-def DMSweFluxEarth(Enu,neuflavor,ch,DMm,DMsig,unit,param):
+def DMSweFluxEarth(Enu,neuflavor,ch,DMm,unit,param):
     """ Gets dN/dz(z) using de swedish data set.
     @type  Enu          :      float
     @param Enu          :      neutrino energy [GeV]
@@ -161,7 +148,6 @@ def DMSweFluxEarth(Enu,neuflavor,ch,DMm,DMsig,unit,param):
         file = open(datDMFluxSweden + filename,'r')
         bins = np.linspace(0.0,1.,201,endpoint=True)
 	z    = (bins[1:]+bins[:-1])/2.
-        #h,dat = gt.hreadfilev2(file)
 	#line = neuflavor+12
 	line = neuflavor+6
 	dn_dz =  np.genfromtxt(file)[line,:]
@@ -183,9 +169,9 @@ def DMSweFluxEarth(Enu,neuflavor,ch,DMm,DMsig,unit,param):
 	    file.close()
 	elif unit == 'flux':
 	    z = z*DMm
-	    DM_annihilation_rate_Sun = float(np.sum(DM.DMSunAnnihilationRate(DMm*param.GeV,DMsig,param)))*param.sec # ann/s	
+	    #DM_annihilation_rate_Sun = float(np.sum(DM.DMSunAnnihilationRate(DMm*param.GeV,DMsig,param)))*param.sec # ann/s	
 	    #factor = DM_annihilation_rate_Sun/(4.0*np.pi*(param.AU/param.cm)**2*DMm)
-	    factor = DM_annihilation_rate_Sun/(4.0*np.pi*(param.SUNRADIUS*param.km/param.cm)**2*DMm)
+	    #factor = DM_annihilation_rate_Sun/(4.0*np.pi*(param.SUNRADIUS*param.km/param.cm)**2*DMm)
 	    dn_dz = factor * dn_dz
             if Enu < z[0]:
                 return 0.0
@@ -223,11 +209,8 @@ def pythiaflux(Enu,neuflavor,ch,DMm):
             print "Interpolation error."
             quit()
     else:
-    	filedir = '/data/user/qliu/DM/pythia_sim/'
+    	filedir = '../Pythia/no_EW/data/'
   	DMmstring = format(DMm,'.0f')
-   	#filename = "nu_"+str(DMmstring)+'_'+ch+'-'+flavor[neuflavor]+".dat"
-	#E = np.genfromtxt(filedir+filename)[:,0]
-	#dNdx = np.genfromtxt(filedir+filename)[:,1]*DMm
 	if ch=='ww':
 		filename = 'WW'+'_'+str(DMmstring)+".dat"
 	else:
@@ -280,10 +263,6 @@ def herwigflux(Enu,neuflavor,ch,DMm):
     	weight     = 1./(evtnum*bin_width)
     	nu_hist, _ = np.histogram(data,bins = E,weights=[weight]*len(data))
     	dNdx       = nu_hist*DMm
-	#print 'Enu'
-	#print Enu
-	#print 'bin_center'
-	#print bin_center
 	if Enu < bin_center[0]:
             return 0.0
         elif Enu <= bin_center[-1]:    
@@ -319,10 +298,6 @@ def Distance(theta,param):
 	x        = Symbol('x')
 	solution = solve((x*x+r_earth*r_earth-AU*AU)/(2*x*r_earth)-np.cos(np.pi-theta),x)
 	d_tot     = [f for f in solution if f > 0][0]
-	#if np.pi/2.< theta <= np.pi:
-	#	d_earth  = 2*np.cos(np.pi-theta)*param.EARTHRADIUS 
-	#else:
-	#	d_earth  = 0.
 	d_earthatm    = nsq.EarthAtm.Track(theta)
 	d_earthatm    = d_earthatm.GetFinalX()/param.km
 	d_vacuum = d_tot-d_earthatm
@@ -330,16 +305,36 @@ def Distance(theta,param):
 	return np.array([d_tot,d_vacuum, d_earthatm])
 
 
-def NuFluxSurface_multi_both(proflux,Enu_min,Enu_max,nodes,ch,DMm, DMsig,param,theta_12=33.82,theta_23=49.7,theta_13=8.61,delta_m_12=7.39e-5,delta_m_13=2.525e-3,delta=0.,logscale=False,interactions=False,location = 'Earth',time=57754.,angle=None,latitude=-90.):
+def NuFluxSurface_multi_both(proflux,Enu_min,Enu_max,nodes,ch,DMm,param,theta_12=33.82,theta_23=48.6,theta_13=8.60,delta_m_12=7.39e-5,delta_m_13=2.528e-3,delta=0.,logscale=False,interactions=True,location = 'Earth',time=57754.,angle=None,latitude=-90.,xsec=None):
 	''' calculate neutrino flux at sun surface (multiple energy mode with interactions)
-	@type  Enu	:	float
-	@param Enu	:	GeV	
+	@type  proflux  :       str
+	@param proflux  :       name of the production flux, e.g. Pythia 
+	@type  Enu_min	:	float
+	@param Enu_min	:	GeV	
+	@type  Enu_max	:	float
+	@param Enu_max	:	GeV	
+	@type  nodes	:       int	
+	@param nodes	:       number of nodes 	
+	@type  ch	:       str	
+	@param ch	:       channel of the production 	
 	@type  DMm	:	float
 	@param DMm	:	GeV
-	@param theta    :       zenith
-	@return 	:	flux GeV^-1sr^-1s^-1cm^-2
+	@type  location :       str 
+	@param location :       Sunsfc or Earth 
+	@type  time     :       float
+	@parm  time     :       MJD of the detection time (input can be either the angle or the time) 
+	@type  angle    :       float
+	@param  angle   :       Zenith angle of the detection in degree (input can be either the angle or the time) 
+	@parm  time     :       MJD of the detection time
+        @type  latitude :       float
+        @param latitude :       latitude of the detector
+	@type xsec      :       str
+	@param xsec     :       path to neutrino xsec files.  
+	@return 	:	flux per annihilation 
 	'''
-	#annihilation
+	#Oscillation parameters are from NuFIT 4.1 (2019) normal ordering with delta_cp=0. Adjust according to your need. 
+	#default cross section is based on isoscalar target from arXiv: 1106.3723v2. I have also run nusigma which is a neutrino-nucleon cross section writen by J. Edsjo assuming isoscalar target. There files are in `./xsec/`. The choice of the cross sections makes difference.  
+	#TODO: implement full MC
 	
 	#DM_annihilation_rate_Sun = float(np.sum(DM.DMSunAnnihilationRate(DMm*param.GeV,DMsig,param)))*param.sec
 	DM_annihilation_rate_Sun = 1.
@@ -363,12 +358,12 @@ def NuFluxSurface_multi_both(proflux,Enu_min,Enu_max,nodes,ch,DMm, DMsig,param,t
    	else:	
             print 'No Such Production'
 
-	#factor = 1  
 	flux = {}
-	#xsec = nsq.NeutrinoDISCrossSectionsFromTables('./xsec/nusigma_')
-	#xsec = nsq.NeutrinoDISCrossSectionsFromTables('/data/user/qliu/DM/GOLEMTools/sources/nuSQuIDS/data/xsections/nusigma_')
-	#nuSQ = nsq.nuSQUIDS(e_vector,3,nsq.NeutrinoType.both,interactions,xsec)
-	nuSQ = nsq.nuSQUIDS(e_vector,3,nsq.NeutrinoType.both,interactions)
+	if xsec == None:
+		nuSQ = nsq.nuSQUIDS(e_vector,3,nsq.NeutrinoType.both,interactions)
+	else:
+		xsec = nsq.NeutrinoDISCrossSectionsFromTables(xsec+'nusigma_')
+		nuSQ = nsq.nuSQUIDS(e_vector,3,nsq.NeutrinoType.both,interactions,xsec)
 	energy = nuSQ.GetERange()
 	for i in range(3):
 		flux[str(i)+'_nu'] = np.array(map(lambda E_nu: production(E_nu/param.GeV,i*2,ch,DMm),energy))
@@ -377,15 +372,12 @@ def NuFluxSurface_multi_both(proflux,Enu_min,Enu_max,nodes,ch,DMm, DMsig,param,t
 	print energy 
 	print 'flux'
 	print flux
-	#nuSQ.Set_Body(nsq.ConstantDensity(13.0,0.5))
 	nuSQ.Set_Body(nsq.Sun())
 	nuSQ.Set_Track(nsq.Sun.Track(param.SUNRADIUS*param.km))
 	#nuSQ.Set_Track(nsq.ConstantDensity.Track(param.SUNRADIUS*param.km))
-	#nuSQ.Set_MixingParametersToDefault()
 	nuSQ.Set_MixingAngle(0,1,np.deg2rad(theta_12))
 	nuSQ.Set_MixingAngle(0,2,np.deg2rad(theta_13))
 	nuSQ.Set_MixingAngle(1,2,np.deg2rad(theta_23))
-	#nuSQ.Set_MixingAngle(0,3,np.deg2rad(theta_23))
 	nuSQ.Set_SquareMassDifference(1,delta_m_12)
 	nuSQ.Set_SquareMassDifference(2,delta_m_13)
 	nuSQ.Set_abs_error(1.e-5)
@@ -404,19 +396,24 @@ def NuFluxSurface_multi_both(proflux,Enu_min,Enu_max,nodes,ch,DMm, DMsig,param,t
 	nuSQ.EvolveState()
 	
 	e_range = np.linspace(Enu_min,Enu_max,nodes)
-	flux_surface = np.zeros(len(e_range),dtype = [('nu_e','float'),('nu_mu','float'),('nu_tau','float'),('nu_e_bar','float'),('nu_mu_bar','float'),('nu_tau_bar','float'),('zenith','float')]) 
+	flux_surface = np.zeros(len(e_range),dtype = [('Energy','float'),('nu_e','float'),('nu_mu','float'),('nu_tau','float'),('nu_e_bar','float'),('nu_mu_bar','float'),('nu_tau_bar','float'),('zenith','float')]) 
 	
 
 	if location == 'Sunsfc':
 		#factor = DM_annihilation_rate_Sun/(4.0*np.pi*(param.SUNRADIUS*param.km/param.cm)**2*DMm)
 		factor = 1. 
+		flux_surface['Energy'] = e_range 
 		flux_surface['nu_e'] = factor*np.array([nuSQ.EvalFlavor(0,e,0) for e in   e_range])
 		flux_surface['nu_mu'] = factor*np.array([nuSQ.EvalFlavor(1,e,0) for e in  e_range])
 		flux_surface['nu_tau'] = factor*np.array([nuSQ.EvalFlavor(2,e,0) for e in e_range])
 		flux_surface['nu_e_bar'] = factor*np.array([nuSQ.EvalFlavor(0,e,1) for e in e_range])
 		flux_surface['nu_mu_bar'] = factor*np.array([nuSQ.EvalFlavor(1,e,1) for e in e_range])
 		flux_surface['nu_tau_bar'] = factor*np.array([nuSQ.EvalFlavor(2,e,1) for e in e_range])
+		
+		return flux_surface
+
 	elif location == 'Earth':
+		flux_earth = flux_surface
 		if angle == None:
 			zenith = SunZenith(time,latitude)
 		else:
@@ -425,7 +422,7 @@ def NuFluxSurface_multi_both(proflux,Enu_min,Enu_max,nodes,ch,DMm, DMsig,param,t
 		d_tot, d_vacuum, d_earthatm = Distance(zenith,param)
 		
 		#factor = DM_annihilation_rate_Sun/(4.0*np.pi*(param.AU/param.cm)**2*DMm)
-		factor = DM_annihilation_rate_Sun/(4.0*np.pi*(d_tot*param.km/param.cm)**2*DMm)
+		#factor = DM_annihilation_rate_Sun/(4.0*np.pi*(d_tot*param.km/param.cm)**2*DMm)
 
 	
 		composition_new =np.array([[[nuSQ.EvalFlavor(0,e,0),nuSQ.EvalFlavor(1,e,0),nuSQ.EvalFlavor(2,e,0)],[nuSQ.EvalFlavor(0,e,1),nuSQ.EvalFlavor(1,e,1),nuSQ.EvalFlavor(2,e,1)]] for e in e_range])
@@ -449,12 +446,13 @@ def NuFluxSurface_multi_both(proflux,Enu_min,Enu_max,nodes,ch,DMm, DMsig,param,t
 		nuSQ.Set_initial_state(composition_new,nsq.Basis.flavor)
 		nuSQ.Set_TauRegeneration(True)
 		nuSQ.EvolveState()
-		flux_surface['nu_e']       = factor*np.array([nuSQ.EvalFlavor(0,e,0) for e in   e_range])
-		flux_surface['nu_mu']      = factor*np.array([nuSQ.EvalFlavor(1,e,0) for e in  e_range])
-		flux_surface['nu_tau']     = factor*np.array([nuSQ.EvalFlavor(2,e,0) for e in e_range])
-		flux_surface['nu_e_bar']   = factor*np.array([nuSQ.EvalFlavor(0,e,1) for e in e_range])
-		flux_surface['nu_mu_bar']  = factor*np.array([nuSQ.EvalFlavor(1,e,1) for e in e_range])
-		flux_surface['nu_tau_bar'] = factor*np.array([nuSQ.EvalFlavor(2,e,1) for e in e_range])
-		flux_surface['zenith']	   = np.array([zenith]*len(e_range))	
+		flux_earth['Energy']     = e_range 
+		flux_earth['nu_e']       = factor*np.array([nuSQ.EvalFlavor(0,e,0) for e in   e_range])
+		flux_earth['nu_mu']      = factor*np.array([nuSQ.EvalFlavor(1,e,0) for e in  e_range])
+		flux_earth['nu_tau']     = factor*np.array([nuSQ.EvalFlavor(2,e,0) for e in e_range])
+		flux_earth['nu_e_bar']   = factor*np.array([nuSQ.EvalFlavor(0,e,1) for e in e_range])
+		flux_earth['nu_mu_bar']  = factor*np.array([nuSQ.EvalFlavor(1,e,1) for e in e_range])
+		flux_earth['nu_tau_bar'] = factor*np.array([nuSQ.EvalFlavor(2,e,1) for e in e_range])
+		flux_earth['zenith']	   = np.array([zenith]*len(e_range))	
 	
-	return flux_surface
+		return flux_earth
