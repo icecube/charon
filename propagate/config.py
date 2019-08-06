@@ -305,7 +305,7 @@ def Distance(theta,param):
 	return np.array([d_tot,d_vacuum, d_earthatm])
 
 
-def NuFluxSurface_multi_both(proflux,Enu_min,Enu_max,nodes,ch,DMm,param,theta_12=33.82,theta_23=48.6,theta_13=8.60,delta_m_12=7.39e-5,delta_m_13=2.528e-3,delta=0.,logscale=False,interactions=True,location = 'Earth',time=57754.,angle=None,latitude=-90.,xsec=None):
+def NuFlux(proflux,Enu_min,Enu_max,nodes,ch,DMm,param,theta_12=33.82,theta_23=48.6,theta_13=8.60,delta_m_12=7.39e-5,delta_m_13=2.528e-3,delta=0.,logscale=False,interactions=True,location = 'Earth',time=57754.,angle=None,latitude=-90.,xsec=None):
 	''' calculate neutrino flux at sun surface (multiple energy mode with interactions)
 	@type  proflux  :       str
 	@param proflux  :       name of the production flux, e.g. Pythia 
@@ -399,9 +399,9 @@ def NuFluxSurface_multi_both(proflux,Enu_min,Enu_max,nodes,ch,DMm,param,theta_12
 	flux_surface = np.zeros(len(e_range),dtype = [('Energy','float'),('nu_e','float'),('nu_mu','float'),('nu_tau','float'),('nu_e_bar','float'),('nu_mu_bar','float'),('nu_tau_bar','float'),('zenith','float')]) 
 	
 
+	factor = 1. 
 	if location == 'Sunsfc':
 		#factor = DM_annihilation_rate_Sun/(4.0*np.pi*(param.SUNRADIUS*param.km/param.cm)**2*DMm)
-		factor = 1. 
 		flux_surface['Energy'] = e_range 
 		flux_surface['nu_e'] = factor*np.array([nuSQ.EvalFlavor(0,e,0) for e in   e_range])
 		flux_surface['nu_mu'] = factor*np.array([nuSQ.EvalFlavor(1,e,0) for e in  e_range])
