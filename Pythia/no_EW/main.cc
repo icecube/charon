@@ -5,6 +5,7 @@
 
 // Author : Q.R. Liu
 
+
 #include "Pythia8/Pythia.h"
 
 // Allow assertions
@@ -493,7 +494,7 @@ int main(int argc, char** argv) {
   nuTauBar *= 1. / (nEvent * xMaxIn / bin);
   cout << nuMu << nuMuBar << nuE << nuEBar << nuTau << nuTauBar << endl;
 
-  HistPlot hpl("plot"+channel+"_"+std::to_string(int(xMaxIn)));
+  HistPlot hpl("plot_"+channel+"_"+std::to_string(int(xMaxIn)));
   hpl.frame( channel+"_"+std::to_string(int(xMaxIn))+"_"+std::to_string(seed), "Particle energy spectra", "$E$ (GeV)",
       "$\\mathrm{d}N / \\mathrm{d}E$ (GeV$^{-1}$)");
   hpl.add(nuE,      "-", "$\\nu_e$");

@@ -2,10 +2,10 @@ Date    : May 24 2019
 Author  : Q.R. Liu
 
 Here is how to start running these scripts.
-Just do 
-
+-----------------------------------------------
+To generate events, just do 
 ```
-./run.sh channel mass Nevent seed
+./run.sh channel mass bins seed Nevent
 ```
 --channel
 channel is the annihilation channel you want to generate:
@@ -16,8 +16,17 @@ numbers correpond to the MC particle numbering scheme
 --mass
 DM mass in GeV.
 
---Nevent
-number of events you want to generate.
+--bins
+Number of energy bins
 
 --seed
 seed for MC generation 
+
+--Nevent
+number of events you want to generate.
+
+------------------------------------------------
+Files generated are in ./data with name channel_mass.dat with 10000000 events in form 
+|Enu|nu-e|nu-e-bar|nu-mu|nu-mu-bar|nu-tau|nu-tau-bar|
+
+Only fluxes at the production here. The flus is dN/dE per annihilation.
