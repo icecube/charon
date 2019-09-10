@@ -7,11 +7,11 @@ import argparse
 p = argparse.ArgumentParser(description="parameters needed to make .cmnd files", formatter_class=argparse.RawTextHelpFormatter)
 
 p.add_argument("--channel",default='bb',type=str,
-		help="channel of the DM annihilation")
+				help="channel of the DM annihilation")
 p.add_argument("--mass",default=1000,type=int,
-		help="DM mass")
+				help="DM mass")
 p.add_argument("--Nevent",default=1000,type=int,
-		help="number of events")
+				help="number of events")
 args = p.parse_args()
 
 channel = args.channel
@@ -19,7 +19,7 @@ mass    = args.mass
 Ecm     = float(2*mass)
 Nevent  = args.Nevent
 
-code    = {'dd':1,'uu':2,'ss':3,'cc':4,'bb':5,'tt':6,'gg':7,'WW':8,'ZZ':9,'mumu':10,'tautau':11,'nuenue':12,'numunumu':13,'nutaunutau':14}
+code    = {'dd':1,'uu':2,'ss':3,'cc':4,'bb':5,'tt':6,'gg':21,'WW':24,'ZZ':9,'mumu':13,'tautau':15,'nuenue':12,'numunumu':14,'nutaunutau':16}
 
 f = open(channel+'_'+str(mass)+'.cmnd','w')
 f.write('Main:numberOfEvents = '+str(Nevent)+'\n')
