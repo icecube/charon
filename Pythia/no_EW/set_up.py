@@ -19,7 +19,7 @@ mass    = args.mass
 Ecm     = float(2*mass)
 Nevent  = args.Nevent
 
-code    = {'dd':1,'uu':2,'ss':3,'cc':4,'bb':5,'tt':6,'gg':21,'WW':24,'ZZ':9,'mumu':13,'tautau':15,'nuenue':12,'numunumu':14,'nutaunutau':16}
+code    = {'dd':1,'uu':2,'ss':3,'cc':4,'bb':5,'tt':6,'gg':21,'WW':24,'ZZ':23,'mumu':13,'tautau':15,'nuenue':12,'numunumu':14,'nutaunutau':16}
 
 f = open(channel+'_'+str(mass)+'.cmnd','w')
 f.write('Main:numberOfEvents = '+str(Nevent)+'\n')
