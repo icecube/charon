@@ -5,7 +5,7 @@ Here is how to start running these scripts.
 -----------------------------------------------
 To generate events, just do 
 ```
-./run.sh channel mass bins seed Nevent
+./run.sh channel mass bins seed Nevent location
 ```
 --channel
 channel is the annihilation channel you want to generate:
@@ -25,7 +25,11 @@ seed for MC generation
 --Nevent
 number of events you want to generate.
 
+--location
+location of the DM annihilation. Available: "Sun","Earth" 
+
 ------------------------------------------------
+
 Files generated are in ./data with name channel_mass.dat with 10000000 events in form 
 |Enu|nu-e|nu-e-bar|nu-mu|nu-mu-bar|nu-tau|nu-tau-bar|
 

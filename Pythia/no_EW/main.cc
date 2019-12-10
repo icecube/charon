@@ -225,7 +225,7 @@ bool interact(int& id, Vec4& p4Vec, Event& event){
 // Particle must be either a B Meson, D Meson, B Baryon, C Baryon or B Bbar.
 // Events are weighted according to the interaction and decay rates.
 
-bool interDecay(int& id, Vec4& p4Vec, double inWeight=1.){
+bool interDecay(int& id, Vec4& p4Vec,string loc="Sun", double inWeight=1.){
   if (DEBUG) cout << "|| Entering interDecay" << endl;
   if (isnan(inWeight)) assert(0);
 
@@ -266,8 +266,9 @@ bool interDecay(int& id, Vec4& p4Vec, double inWeight=1.){
     cout << "Error, trying to decay " << id << "\n" << endl;
     assert(0);
   }
-
-  double rho = 148.9; //sun center density 148.9 g/cm3
+  double rho ;
+  if      (loc == "Sun")    rho = 138.9;     //sun center density 148.9 g/cm3 	
+  else if (loc == "Earth")  rho = 13.08849999999999802; //earth center density 13.088 g/cm3
   double N   = 6.0221409e23;
   prettyPrint("rho",  rho);
   prettyPrint("N",  N);
@@ -316,7 +317,7 @@ bool interDecay(int& id, Vec4& p4Vec, double inWeight=1.){
       if (isBMeson(idFS) || isBBaryon(idFS) ||
           isDMeson(idFS) || isCBaryon(idFS)){
         Vec4 p4vecFS = decayEvent[i].p();
-        if ( !interDecay(idFS, p4vecFS, decayWeight) ) return false;
+        if ( !interDecay(idFS, p4vecFS,loc, decayWeight) ) return false;
       }
     }
   }
@@ -329,7 +330,7 @@ bool interDecay(int& id, Vec4& p4Vec, double inWeight=1.){
       if (isBMeson(idFS) || isBBaryon(idFS) ||
           isDMeson(idFS) || isCBaryon(idFS)){
         Vec4 p4vecFS = interEvent[i].p();
-        if ( !interDecay(idFS, p4vecFS, interWeight) ) return false;
+        if ( !interDecay(idFS, p4vecFS, loc,interWeight) ) return false;
       }
     }
   }
@@ -374,11 +375,12 @@ int main(int argc, char** argv) {
   // Hand pointer to Pythia.
   pythia.setSigmaPtr(sigma1GenRes);
 
-  string channel = string(argv[1]);
-  double xMaxIn = atof(argv[2]); 
-  int    nBinIn = atoi(argv[3]);
-  int    seed   = atoi(argv[4]);
-  double bin = double(nBinIn); 
+  string channel      = string(argv[1]);
+  double xMaxIn       = atof(argv[2]); 
+  int    nBinIn       = atoi(argv[3]);
+  int    seed         = atoi(argv[4]);
+  double bin          = double(nBinIn); 
+  string location     = string(argv[5]);
 
   nuE     = Hist("electron neutrino spectrum",      nBinIn, 0., xMaxIn);
   nuEBar  = Hist("anti electron neutrino spectrum", nBinIn, 0., xMaxIn);
@@ -471,7 +473,7 @@ int main(int argc, char** argv) {
         if (isBMeson(idFS) || isBBaryon(idFS) || isDMeson(idFS) ||
             isCBaryon(idFS)){
           Vec4 p4Vec = event[i].p();
-          if ( !interDecay(idFS, p4Vec) ){
+          if ( !interDecay(idFS, p4Vec,location) ){
             if (++iAbort < nAbort) continue;
             cout << " Event generation aborted prematurely, owing to error!\n";
             assert(0);
@@ -494,8 +496,8 @@ int main(int argc, char** argv) {
   nuTauBar *= 1. / (nEvent * xMaxIn / bin);
   cout << nuMu << nuMuBar << nuE << nuEBar << nuTau << nuTauBar << endl;
 
-  HistPlot hpl("plot_"+channel+"_"+std::to_string(int(xMaxIn)));
-  hpl.frame( channel+"_"+std::to_string(int(xMaxIn))+"_"+std::to_string(seed), "Particle energy spectra", "$E$ (GeV)",
+  HistPlot hpl("plot_"+channel+"_"+std::to_string(int(xMaxIn))+"_"+location);
+  hpl.frame( channel+"_"+std::to_string(int(xMaxIn))+"_"+std::to_string(seed)+"_"+location, "Particle energy spectra", "$E$ (GeV)",
       "$\\mathrm{d}N / \\mathrm{d}E$ (GeV$^{-1}$)");
   hpl.add(nuE,      "-", "$\\nu_e$");
   hpl.add(nuEBar,   "-", "$\\bar{\\nu}_e$");
