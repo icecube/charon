@@ -5,16 +5,12 @@
 
 // Author : Q.R. Liu
 
-
 #include "Pythia8/Pythia.h"
-
 // Allow assertions
 #include <cassert>
 
 using namespace Pythia8;
-
 //==========================================================================
-
 // Pythia generator.
 Pythia pythia;
 Pythia hadPythia;
@@ -392,9 +388,21 @@ int main(int argc, char** argv) {
   // Read in the rest of the settings and data from a separate file.
   
   //pythia.readFile("channel.cmnd");
-  pythia.readFile(channel+"_"+std::to_string(int(xMaxIn))+".cmnd");
+  pythia.readFile("./cmnd/"+channel+"_"+std::to_string(int(xMaxIn))+".cmnd");
+  if (location == "Sun" ||location == "Earth") {
+  prettyPrint("Consider interaction at: ",  location);
   pythia.readFile("decays.cmnd");
   hadPythia.readFile("decays.cmnd");
+  }
+  else {
+  prettyPrint("No interaction at: ",  location);
+  //Long-lived particles should decay
+  pythia.particleData.mayDecay(13, true);    //mu+-
+  pythia.particleData.mayDecay(211, true);   //pi+-
+  pythia.particleData.mayDecay(321, true);   //K+-
+  pythia.particleData.mayDecay(130, true);   //K0_L	
+  pythia.particleData.mayDecay(2112, true);  //n
+  }
   // Intialize hadronization Pythia object.
   hadPythia.readString("ProcessLevel:all = off");
   hadPythia.readString("PDF:lepton = off");
@@ -404,11 +412,11 @@ int main(int argc, char** argv) {
   hadPythia.readString("Random:setSeed = on");
   pythia.readString("Random:seed = "+std::to_string(seed));
   hadPythia.readString("Random:seed = "+std::to_string(seed));
-  //hadPythia.readString("WeakBosonExchange:all = on");
-  //hadPythia.readString("WeakBosonExchange:ff2ff(t:W) = on");
-  //hadPythia.readString("WeakSingleBoson:all = on");
-  //hadPythia.readString("WeakDoubleBoson:all = on");
-  //hadPythia.readString("WeakBosonAndParton:all = on");
+  hadPythia.readString("WeakBosonExchange:all = on");
+  hadPythia.readString("WeakBosonExchange:ff2ff(t:W) = on");
+  hadPythia.readString("WeakSingleBoson:all = on");
+  hadPythia.readString("WeakDoubleBoson:all = on");
+  hadPythia.readString("WeakBosonAndParton:all = on");
 
   // Initialization.
   if (!DEBUG) pythia.readString("Print:quiet = on");
@@ -470,15 +478,17 @@ int main(int argc, char** argv) {
         else if (idFS == -16) nuTauBar.fill(eFS);
 
         // Undergo further interactions for particles which interact.
-        if (isBMeson(idFS) || isBBaryon(idFS) || isDMeson(idFS) ||
-            isCBaryon(idFS)){
-          Vec4 p4Vec = event[i].p();
-          if ( !interDecay(idFS, p4Vec,location) ){
-            if (++iAbort < nAbort) continue;
-            cout << " Event generation aborted prematurely, owing to error!\n";
-            assert(0);
-          };
-        }
+        if (location == "Sun" ||location == "Earth") {
+		if (isBMeson(idFS) || isBBaryon(idFS) || isDMeson(idFS) ||
+            	isCBaryon(idFS)){
+         	 Vec4 p4Vec = event[i].p();
+         	 if ( !interDecay(idFS, p4Vec,location) ){
+          	  if (++iAbort < nAbort) continue;
+          	  cout << " Event generation aborted prematurely, owing to error!\n";
+          	  assert(0);
+         	 	};
+      	  	}
+     	 }
       }
     }
     // End of event loop.
@@ -496,8 +506,8 @@ int main(int argc, char** argv) {
   nuTauBar *= 1. / (nEvent * xMaxIn / bin);
   cout << nuMu << nuMuBar << nuE << nuEBar << nuTau << nuTauBar << endl;
 
-  HistPlot hpl("plot_"+channel+"_"+std::to_string(int(xMaxIn))+"_"+location);
-  hpl.frame( channel+"_"+std::to_string(int(xMaxIn))+"_"+std::to_string(seed)+"_"+location, "Particle energy spectra", "$E$ (GeV)",
+  HistPlot hpl("./plot_"+channel+"_"+std::to_string(int(xMaxIn))+"_"+location);
+  hpl.frame("./"+location+"/"+channel+"_"+std::to_string(int(xMaxIn))+"_"+std::to_string(seed)+"_"+location, "Particle energy spectra", "$E$ (GeV)",
       "$\\mathrm{d}N / \\mathrm{d}E$ (GeV$^{-1}$)");
   hpl.add(nuE,      "-", "$\\nu_e$");
   hpl.add(nuEBar,   "-", "$\\bar{\\nu}_e$");
@@ -505,7 +515,7 @@ int main(int argc, char** argv) {
   hpl.add(nuMuBar,  "-", "$\\bar{\\nu}_\\mu$");
   hpl.add(nuTau,    "-", "$\\nu_\\tau$");
   hpl.add(nuTauBar, "-", "$\\bar{\\nu}_\\tau}$");
-  hpl.plot(false); 
+  hpl.plot(true); 
 
   delete sigma1GenRes;
   return 0;
