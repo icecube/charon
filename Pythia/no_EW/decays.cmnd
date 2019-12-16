@@ -26,36 +26,6 @@
 10543:mayDecay = false        ! B*_c1L+
 20543:mayDecay = false        ! B*_c1H+
 545:mayDecay   = false        ! B*_c2+
-!! Don't decay B Bbar
-!551:mayDecay   = false
-!10551:mayDecay  = false
-!!100551:mayDecay   = false
-!!110551:mayDecay   = false
-!!200551:mayDecay   = false
-!!210551:mayDecay   = false
-!553:mayDecay    = false
-!!110553:mayDecay = false
-!20553:mayDecay  = false
-!0553:mayDecay    = false
-!100553:mayDecay = false
-!10553:mayDecay   = false
-!!120553:mayDecay   = false
-!!130553:mayDecay   = false
-!200553:mayDecay = false
-!!210553:mayDecay   = false
-!!220553:mayDecay   = false
-!!300553:mayDecay   = false
-!!9000533:mayDecay  = false
-!!9010533:mayDecay  = false
-!555:mayDecay    = false
-!!10555:mayDecay    = false
-!!20555:mayDecay    = false
-!!100555:mayDecay   = false
-!!110555:mayDecay   = false
-!!120555:mayDecay   = false
-!!200555:mayDecay   = false
-!!557:mayDecay      = false
-!!100557:mayDecay   = false
 ! Don't decay B baryons
 5122:mayDecay = false
 !5112:mayDecay = false
@@ -134,17 +104,3 @@
 4432:mayDecay = false
 4434:mayDecay = false
 4444:mayDecay = false
-!ccbar
-!441:mayDecay = false
-!10441:mayDecay = false
-!100441:mayDecay = false
-!443:mayDecay = false
-!10443:mayDecay = false
-!20443:mayDecay = false
-!100443:mayDecay = false
-!30443:mayDecay = false
-!!9000443:mayDecay = false
-!!9010443:mayDecay = false
-!!9020443:mayDecay = false
-!445:mayDecay = false
-!!100445:mayDecay = false

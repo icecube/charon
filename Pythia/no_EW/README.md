@@ -10,8 +10,7 @@ To generate events, just do
 --channel
 channel is the annihilation channel you want to generate:
 Now available ones are:
-{'dd':1,'uu':2,'ss':3,'cc':4,'bb':5,'tt':6,'gg':7,'WW':8,'ZZ':9,'mumu':10,'tautau':11,'nuenue':12,'numunumu':13,'nutaunutau':14}
-numbers correpond to the MC particle numbering scheme
+{'dd','uu','ss','cc','bb','tt','gg','WW','ZZ','mumu','tautau','nuenue','numunumu','nutaunutau'}
 
 --mass
 DM mass in GeV.
@@ -26,11 +25,19 @@ seed for MC generation
 number of events you want to generate.
 
 --location
-location of the DM annihilation. Available: "Sun","Earth" 
+location of the DM annihilation. Available: "Sun", "Earth" ,"GC" 
 
 ------------------------------------------------
+Files are saved in ./location/ with name channel_mass_seed_location-#.dat where 
+0-nue
+1-nue_bar
+2-numu
+3-numu_bar
+4-nutau
+5-nutau_bar 
+and the first column is energy is GeV.
 
-Files generated are in ./data with name channel_mass.dat with 10000000 events in form 
+Generated tables are in ./data with name channel_mass.dat with 10000000 events in form 
 |Enu|nu-e|nu-e-bar|nu-mu|nu-mu-bar|nu-tau|nu-tau-bar|
 
-Only fluxes at the production here. The flus is dN/dE per annihilation.
+Only fluxes at the production here. The flux is dN/dE per annihilation.
