@@ -4,7 +4,7 @@ Here is how to start running these scripts.
 -----------------------------------------------
 To generate events, just do 
 ```
-./run.sh channel mass bins seed Nevent location
+./run.sh channel mass location process type Nevent bins lower_energy_bound binning_scale (density mediator_mass seed) 
 ```
 
 --channel
@@ -37,16 +37,16 @@ number of events you want to generate
 number of energy bins
 
 
---lower energy bound
+--lower_energy_bound
 lowest energy (GeV) for the spectrum
 
---binning scale
+--binning_scale
 bin the spectrum in linear ("-") or log ("log") scale 
 If the type is "secluded", we need to specify the density and mediator mass at the location of decay.
 
-  -- density
+  -- density (g/cm^3)
 
-  -- mediator mass
+  -- mediator_mass (GeV)
 
 The last is an optional parameter 
 
@@ -55,15 +55,24 @@ seed for MC generation
 
 ------------------------------------------------
 Files are saved in ./location/ with name channel_mass_seed_location_process-#.dat where 
+
 0-nue
+
 1-nue_bar
+
 2-numu
+
 3-numu_bar
+
 4-nutau
+
 5-nutau_bar 
-and the first column is energy is GeV. "mass" here is either DM mass or mediator mass depending on the type. 
+
+The first column is energy is GeV. 
+"mass" here is either DM mass or mediator mass depending on the type. 
 
 Generated tables are in ./data with name channel_mass.dat with 10000000 events in form 
+
 |Enu|nu-e|nu-e-bar|nu-mu|nu-mu-bar|nu-tau|nu-tau-bar|
 
 Only fluxes at the production here. The flux is dN/dx or dN/dlogx per annihilation/decay depending on the way of binning.
