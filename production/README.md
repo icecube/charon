@@ -4,7 +4,7 @@ Here is how to start running these scripts.
 -----------------------------------------------
 To generate events, just do 
 ```
-./run.sh channel mass location process type Nevent bins lower_energy_bound binning_scale (density mediator_mass seed) 
+./run.sh channel mass location process type Nevent bins lower_energy_bound binning_scale <br /> (density mediator_mass seed) 
 ```
 
 --channel
@@ -14,33 +14,41 @@ Now available ones are:
 
 
 --mass
+
 DM mass in GeV.
 
 
 --location
+
 location of the DM annihilation. Available: "Sun", "Earth" ,"Halo" 
 
 
 --process
+
 process "ann" or "decay"
 
 
 --type
+
 "-" or "secluded"
 
 
 --Nevent
+
 number of events you want to generate
 
 
 --bins
+
 number of energy bins
 
 
 --lower_energy_bound
+
 lowest energy (GeV) for the spectrum
 
 --binning_scale
+
 bin the spectrum in linear ("-") or log ("log") scale 
 If the type is "secluded", we need to specify the density and mediator mass at the location of decay.
 
@@ -51,6 +59,7 @@ If the type is "secluded", we need to specify the density and mediator mass at t
 The last is an optional parameter 
 
 --seed
+
 seed for MC generation 
 
 ------------------------------------------------
