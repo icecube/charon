@@ -1,31 +1,31 @@
 !! are excited states
 !!! have no lifetime measured
 !!!! fast decay
-! 5) Don't decay B mesons
-511:mayDecay   = false        ! B0
-521:mayDecay   = false        ! B+
-10511:mayDecay = false        ! B*_00
-10521:mayDecay = false        ! B*0+
-!513:mayDecay   = false        ! B*0
-!523:mayDecay   = false        ! B*+
-10513:mayDecay = false        ! B1L0
-10523:mayDecay = false        ! B1L+
-20513:mayDecay = false        ! B1H0
-20523:mayDecay = false        ! B1H+
-515:mayDecay   = false        ! B*_20
-525:mayDecay   = false        ! B*_2+
-531:mayDecay   = false        ! B_s0
-10531:mayDecay = false        ! B*s00
-!533:mayDecay   = false        ! B*_s0
-10533:mayDecay = false        ! B_s1L0
-20533:mayDecay = false        ! B_s1H0
-535:mayDecay   = false        ! B*_s20
-541:mayDecay   = false        ! B_c+
-10541:mayDecay = false        ! B*_c0+
-!543:mayDecay   = false        ! B*_c+
-10543:mayDecay = false        ! B*_c1L+
-20543:mayDecay = false        ! B*_c1H+
-545:mayDecay   = false        ! B*_c2+
+!Don't decay B mesons
+511:mayDecay   = false        
+521:mayDecay   = false        
+10511:mayDecay = false        
+10521:mayDecay = false        
+!513:mayDecay   = false       
+!523:mayDecay   = false       
+10513:mayDecay = false        
+10523:mayDecay = false        
+20513:mayDecay = false        
+20523:mayDecay = false        
+515:mayDecay   = false        
+525:mayDecay   = false        
+531:mayDecay   = false        
+10531:mayDecay = false        
+!533:mayDecay   = false       
+10533:mayDecay = false        
+20533:mayDecay = false        
+535:mayDecay   = false        
+541:mayDecay   = false        
+10541:mayDecay = false        
+!543:mayDecay   = false       
+10543:mayDecay = false        
+20543:mayDecay = false        
+545:mayDecay   = false        
 ! Don't decay B baryons
 5122:mayDecay = false
 !5112:mayDecay = false
@@ -104,7 +104,7 @@
 4432:mayDecay = false
 4434:mayDecay = false
 4444:mayDecay = false
-
+!long-lived particles
 13:mayDecay = false
 130:mayDecay = false
 211:mayDecay = false
