@@ -4,51 +4,45 @@ Here is how to start running these scripts.
 -----------------------------------------------
 To generate events, just do 
 ```
-./run.sh channel mass location process type Nevent bins lower_energy_bound binning_scale <br /> (density mediator_mass seed) 
+./run.sh channel mass location process type Nevent bins lower_energy_bound binning_scale
+(density mediator_mass seed) 
 ```
 
---channel
+--channel <br/>
 channel is the annihilation channel you want to generate:
 Now available ones are:
 {'dd','uu','ss','cc','bb','tt','gg','WW','ZZ','mumu','tautau','nuenue','numunumu','nutaunutau'}
 
 
---mass
-
+--mass <br/>
 DM mass in GeV.
 
 
---location
+--locationi <br/>
+location of the DM annihilation. Available: "Sun", "Earth", "Halo" 
 
-location of the DM annihilation. Available: "Sun", "Earth" ,"Halo" 
 
-
---process
-
+--process  <br/>
 process "ann" or "decay"
 
 
---type
-
+--type <br/>
 "-" or "secluded"
 
 
---Nevent
-
+--Nevent <br/>
 number of events you want to generate
 
 
---bins
-
+--bins <br/>
 number of energy bins
 
 
---lower_energy_bound
-
+--lower_energy_bound <br/>
 lowest energy (GeV) for the spectrum
 
---binning_scale
 
+--binning_scale <br/>
 bin the spectrum in linear ("-") or log ("log") scale 
 If the type is "secluded", we need to specify the density and mediator mass at the location of decay.
 
@@ -56,10 +50,10 @@ If the type is "secluded", we need to specify the density and mediator mass at t
 
   -- mediator_mass (GeV)
 
+
 The last is an optional parameter 
 
---seed
-
+--seed <br/>
 seed for MC generation 
 
 ------------------------------------------------
