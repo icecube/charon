@@ -69,7 +69,7 @@ if channel in ('nuenue','numunumu','nutaunutau'):
 						f.write('{:.4E}'.format(bin_center[j])+'\t'+'0.0000e+00'+'\n')
 					else:
 						non_zero = 1./diff[-1]	
-						f.write('{:.4E}'.format(bin_center[j])+'\t'+'{}'.format(non_zero/2.)+'\n')
+						f.write('{:.4E}'.format(bin_center[j])+'\t'+'{}'.format(non_zero)+'\n')
 			elif process == 'decay':
 				if (bins % 2) == 0:
 					mid      = bin_center[bins/2-1] 
@@ -80,7 +80,7 @@ if channel in ('nuenue','numunumu','nutaunutau'):
 
 				for j in range(bins):
 					if  bin_center[j] == mid:
-						f.write('{:.4E}'.format(bin_center[j])+'\t'+'{}'.format(non_zero/2.)+'\n')
+						f.write('{:.4E}'.format(bin_center[j])+'\t'+'{}'.format(non_zero)+'\n')
 					else:
 						f.write('{:.4E}'.format(bin_center[j])+'\t'+'0.0000e+00'+'\n')
 
@@ -95,27 +95,27 @@ if channel in ('nuenue','numunumu','nutaunutau'):
 
 else:
 	f_name  ='./cmnd/'+channel+'_'+str(mass)+'_'+process+'.cmnd'
-	if os.path.exists(f_name):
-		pass
+	#if os.path.exists(f_name):
+	#	pass
+	#else:
+	f = open(f_name,'w')
+	f.write('Main:numberOfEvents = '+str(Nevent)+'\n')
+	f.write('Main:timesAllowErrors = 5'+'\n') 
+	f.write('Init:showChangedSettings = on'+'\n')     
+	f.write('Init:showChangedParticleData = on'+'\n') 
+	f.write('Next:numberCount = 100'+'\n')            
+	f.write('Next:numberShowInfo = 1'+'\n')           
+	f.write('Next:numberShowProcess = 1'+'\n')        
+	f.write('Next:numberShowEvent = 1'+'\n') 
+	f.write('Beams:idA = -11'+'\n')   
+	f.write('Beams:idB = 11'+'\n')    
+	f.write('PDF:lepton = off'+'\n')
+	f.write('Beams:eCM = '+str(Ecm)+'\n')
+	
+	f.write('999999:all = GeneralResonance void 1 0 0 '+str(Ecm)+' 1. 0. 0. 0.'+'\n')
+	if code[channel] in [21,22,23,25]:
+		f.write('999999:addChannel = 1 1.0 101 '+str(code[channel])+' '+str(code[channel])+'\n') 
 	else:
-		f = open(f_name,'w')
-		f.write('Main:numberOfEvents = '+str(Nevent)+'\n')
-		f.write('Main:timesAllowErrors = 5'+'\n') 
-		f.write('Init:showChangedSettings = on'+'\n')     
-		f.write('Init:showChangedParticleData = on'+'\n') 
-		f.write('Next:numberCount = 100'+'\n')            
-		f.write('Next:numberShowInfo = 1'+'\n')           
-		f.write('Next:numberShowProcess = 1'+'\n')        
-		f.write('Next:numberShowEvent = 1'+'\n') 
-		f.write('Beams:idA = -11'+'\n')   
-		f.write('Beams:idB = 11'+'\n')    
-		f.write('PDF:lepton = off'+'\n')
-		f.write('Beams:eCM = '+str(Ecm)+'\n')
-		
-		f.write('999999:all = GeneralResonance void 1 0 0 '+str(Ecm)+' 1. 0. 0. 0.'+'\n')
-		if code[channel] in [21,22,23,25]:
-			f.write('999999:addChannel = 1 1.0 101 '+str(code[channel])+' '+str(code[channel])+'\n') 
-		else:
-			f.write('999999:addChannel = 1 1.0 101 '+str(code[channel])+' '+str(-code[channel])+'\n')    
-
-		f.close()
+		f.write('999999:addChannel = 1 1.0 101 '+str(code[channel])+' '+str(-code[channel])+'\n')    
+	
+	f.close()

@@ -1,6 +1,4 @@
 // PYTHIA script to generate neutrino production.
-// Calculations for interaction/absorption are taken from S.RITZ, D.SECKEL.
-// Nuclear Physics B304 (1988) 877-908
 // No EW correction added
 
 // Author : Q.R. Liu
@@ -14,12 +12,12 @@ using namespace Pythia8;
 //==========================================================================
 // Pythia generator.
 Pythia pythia;
-Pythia hadPythia;
 
 // Debug flag.
 const bool DEBUG = false;
-// Binning definitions.
+//const bool DEBUG = true;
 
+// Binning definitions.
 /* Hist nuAll   ("all flavor spectrum",             nBinIn, 0., xMaxIn); */
 Hist nuE;     
 Hist nuEBar;  
@@ -129,6 +127,17 @@ bool isCBaryon(int& id){
 
 //==========================================================================
 
+// Check if particle is  long-lived
+
+bool isLongLived(int& id){
+  int idAbs = abs(id);
+  if (idAbs == 13   || idAbs == 211   || idAbs == 321  || idAbs == 130  ||
+	  idAbs == 2112
+	  )
+    return true;
+  else return false;
+}	  
+
 // Fill histogram with final state neutrinos.
 
 void fillFSNeutrino(Event& event, double& weight){
@@ -161,6 +170,13 @@ bool decay(int& id, Vec4& p4Vec, Event& event){
   // Reset event record and set particle to decay.
   pythia.event.reset();
   pythia.particleData.mayDecay(id, true);
+  if (isLongLived(id)){
+  pythia.particleData.mayDecay(13, true);    //mu+-
+  pythia.particleData.mayDecay(211, true);   //pi+-
+  pythia.particleData.mayDecay(321, true);   //K+-
+  pythia.particleData.mayDecay(130, true);   //K0_L	
+  pythia.particleData.mayDecay(2112, true);  //n
+  }		  
 
   // Decay with Pythia.
   double mass = pythia.particleData.m0(id);
@@ -169,6 +185,14 @@ bool decay(int& id, Vec4& p4Vec, Event& event){
 
   // Reset decay of particle.
   pythia.particleData.mayDecay(id, false);
+  
+  if (isLongLived(id)){
+  pythia.particleData.mayDecay(13,  false);    //mu+-
+  pythia.particleData.mayDecay(211, false);   //pi+-
+  pythia.particleData.mayDecay(321, false);   //K+-
+  pythia.particleData.mayDecay(130, false);   //K0_L	
+  pythia.particleData.mayDecay(2112,false);  //n
+  }		  
 
   // Set the event record.
   event = pythia.event;
@@ -224,7 +248,7 @@ bool interact(int& id, Vec4& p4Vec, Event& event){
 // Particle must be either a B Meson, D Meson, B Baryon, C Baryon or B Bbar.
 // Events are weighted according to the interaction and decay rates.
 
-bool interDecay(int& id, Vec4& p4Vec,string loc="Sun", double inWeight=1.,double rho_matter=148.9){
+bool interDecay(int& id, Vec4& p4Vec,string loc="Sun", double inWeight=1.,double rho_matter=148.9,double lower_bound = 0.){
   if (DEBUG) cout << "|| Entering interDecay" << endl;
   if (isnan(inWeight)) assert(0);
 
@@ -248,14 +272,8 @@ bool interDecay(int& id, Vec4& p4Vec,string loc="Sun", double inWeight=1.,double
 
   // Define interaction length, depending on the type of particle.
   // In units of mm/c.
-  //double xSec; // σ_26
-  //double c           = 2.99792458e11;// mm/s
   double interLength;
-  //double xSec; // σ_26
-  //if      ( isBMeson  (id) ) interLength = 2.8e-11*c;
-  //else if ( isDMeson  (id) ) interLength = 2.8e-11*c;
-  //else if ( isBBaryon (id) ) interLength = 1.6e-11*c;
-  //else if ( isCBaryon (id) ) interLength = 1.6e-11*c;
+  
   double xSec;	
   if      ( isBMeson  (id) ) xSec = 1.4;
   else if ( isDMeson  (id) ) xSec = 1.4;
@@ -314,13 +332,20 @@ bool interDecay(int& id, Vec4& p4Vec,string loc="Sun", double inWeight=1.,double
   for (int i = 0; i < decayEvent.size(); ++i){
     if (decayEvent[i].isFinal() && decayWeight!=0.) {
       int idFS = decayEvent[i].id();
-
-      if (isBMeson(idFS) || isBBaryon(idFS) ||
+	  if (isBMeson(idFS) || isBBaryon(idFS) ||
           isDMeson(idFS) || isCBaryon(idFS)){
         Vec4 p4vecFS = decayEvent[i].p();
-        if ( !interDecay(idFS, p4vecFS,loc, decayWeight, rho) ) return false;
+        if ( !interDecay(idFS, p4vecFS,loc, decayWeight, rho,lower_bound) ) return false;
       }
-    }
+	  else if (isLongLived(idFS) && lower_bound <= pythia.particleData.m0(idFS)){
+	    Event restDecay;
+		double EFS = pythia.particleData.m0(idFS);
+        Vec4 p4vecFS = Vec4(0.,0.,0.,EFS);
+  		if ( !decay   (idFS, p4vecFS, restDecay) ) return false;
+          prettyPrint("restDecay size", restDecay.size());
+  		  fillFSNeutrino(restDecay, decayWeight);
+	  }
+	}
   }
 
   // Handle interaction products further.
@@ -331,7 +356,7 @@ bool interDecay(int& id, Vec4& p4Vec,string loc="Sun", double inWeight=1.,double
       if (isBMeson(idFS) || isBBaryon(idFS) ||
           isDMeson(idFS) || isCBaryon(idFS)){
         Vec4 p4vecFS = interEvent[i].p();
-        if ( !interDecay(idFS, p4vecFS, loc,interWeight, rho) ) return false;
+        if ( !interDecay(idFS, p4vecFS, loc,interWeight, rho,lower_bound) ) return false;
       }
     }
   }
@@ -377,22 +402,35 @@ int main(int argc, char** argv) {
   pythia.setSigmaPtr(sigma1GenRes);
 
   string channel      = string(argv[1]);
-  double xMaxIn       = atof(argv[2]); 
+  float xMaxIn       = atof(argv[2]); 
+  //float xMaxIn;
+  //sscanf(argv[2],"%f",&xMaxIn);
+  cout <<  xMaxIn << endl;
   int    nBinIn       = atoi(argv[3]);
   double bin          = double(nBinIn); 
   string location     = string(argv[4]);
   string process      = string(argv[5]);
   double rho_matter   = atof(argv[6]);   //density of mediator decay position
   int    seed         = atoi(argv[7]);
+  string binscale     = string(argv[8]);
+  float lower_edge   = atof(argv[9]);
+  //float lower_edge;
+  //sscanf(argv[9],"%f",&lower_edge);
+  cout << lower_edge << endl;
+
   (void)argc;
-   
-  nuE     = Hist("electron neutrino spectrum",      nBinIn, 0., xMaxIn);
-  nuEBar  = Hist("anti electron neutrino spectrum", nBinIn, 0., xMaxIn);
-  nuMu    = Hist("muon neutrino spectrum",          nBinIn, 0., xMaxIn);
-  nuMuBar = Hist("anti muon neutrino spectrum",     nBinIn, 0., xMaxIn);
-  nuTau   = Hist("tau neutrino spectrum",           nBinIn, 0., xMaxIn);
-  nuTauBar= Hist("anti tau neutrino spectrum",      nBinIn, 0., xMaxIn);
   
+  bool Log;
+  if (binscale == "log") Log = true;
+  else   				 Log = false;
+  
+  nuE     = Hist("electron neutrino spectrum",      nBinIn, lower_edge, xMaxIn, Log);
+  nuEBar  = Hist("anti electron neutrino spectrum", nBinIn, lower_edge, xMaxIn, Log);
+  nuMu    = Hist("muon neutrino spectrum",          nBinIn, lower_edge, xMaxIn, Log);
+  nuMuBar = Hist("anti muon neutrino spectrum",     nBinIn, lower_edge, xMaxIn, Log);
+  nuTau   = Hist("tau neutrino spectrum",           nBinIn, lower_edge, xMaxIn, Log);
+  nuTauBar= Hist("anti tau neutrino spectrum",      nBinIn, lower_edge, xMaxIn, Log);
+
   // Read in the rest of the settings and data from a separate file.
   
   //srand(time(NULL));
@@ -400,12 +438,12 @@ int main(int argc, char** argv) {
 
   cout <<  argv[2] << endl;
   pythia.readFile("./cmnd/"+channel+"_"+argv[2]+"_"+process+".cmnd");
+  //pythia.readFile("./cmnd/"+channel+"_"+argv[2]+"_secluded"+".cmnd");
   if (location == "Sun" ||location == "Earth") {
   prettyPrint("Consider interaction at: ",  location);
   pythia.readFile("decays.cmnd");
-  //hadPythia.readFile("decays.cmnd");
   }
-  else if (location == "Galactic"){
+  else if (location == "Halo"){
   prettyPrint("No interaction at: ",  location);
   //Long-lived particles should decay
   pythia.particleData.mayDecay(13, true);    //mu+-
@@ -415,27 +453,19 @@ int main(int argc, char** argv) {
   pythia.particleData.mayDecay(2112, true);  //n
   }
   // Intialize hadronization Pythia object.
-  //hadPythia.readString("ProcessLevel:all = off");
-  //hadPythia.readString("PDF:lepton = off");
-  //hadPythia.readString("SoftQCD:all = on");
-  //hadPythia.readString("HardQCD:all = on");
   //pythia.readString("SoftQCD:all = on");
   //pythia.readString("HardQCD:all = on");
   pythia.readString("Random:setSeed = on");
-  //hadPythia.readString("Random:setSeed = on");
   pythia.readString("Random:seed = "+std::to_string(seed));
-  //hadPythia.readString("Random:seed = "+std::to_string(seed));
-  //hadPythia.readString("WeakBosonExchange:all = on");
-  //hadPythia.readString("WeakBosonExchange:ff2ff(t:W) = on");
-  //hadPythia.readString("WeakSingleBoson:all = on");
-  //hadPythia.readString("WeakDoubleBoson:all = on");
-  //hadPythia.readString("WeakBosonAndParton:all = on");
+  //pythia.readString("WeakBosonExchange:all = on");
+  //pythia.readString("WeakBosonExchange:ff2ff(t:W) = on");
+  //pythia.readString("WeakSingleBoson:all = on");
+  //pythia.readString("WeakDoubleBoson:all = on");
+  //pythia.readString("WeakBosonAndParton:all = on");
 
   // Initialization.
   if (!DEBUG) pythia.readString("Print:quiet = on");
-  //if (!DEBUG) hadPythia.readString("Print:quiet = on");
   pythia.init();
-  //hadPythia.init();
 
   // Extract settings to be used in the main program.
   int nEvent  = pythia.mode("Main:numberOfEvents");
@@ -495,7 +525,7 @@ int main(int argc, char** argv) {
 		if (isBMeson(idFS) || isBBaryon(idFS) || isDMeson(idFS) ||
             	isCBaryon(idFS)){
          	 Vec4 p4Vec = event[i].p();
-         	 if ( !interDecay(idFS, p4Vec,location,1.,rho_matter) ){
+         	 if ( !interDecay(idFS, p4Vec,location,1.,rho_matter,lower_edge) ){
           	  if (++iAbort < nAbort) continue;
           	  cout << " Event generation aborted prematurely, owing to error!\n";
           	  assert(0);
@@ -510,13 +540,19 @@ int main(int argc, char** argv) {
   // Final statistics and histograms.
   // Rescale according to number of events and binning.
   pythia.stat();
+
+  double width; 
+  if (binscale == "log")  width = (log10 (xMaxIn / xMaxIn) - log10 (lower_edge / xMaxIn)) / bin; 
+  else 					  width = (xMaxIn - lower_edge) / (xMaxIn * bin);
   
-  nuE      *= 1. / (nEvent * xMaxIn / bin);
-  nuEBar   *= 1. / (nEvent * xMaxIn / bin);
-  nuMu     *= 1. / (nEvent * xMaxIn / bin);
-  nuMuBar  *= 1. / (nEvent * xMaxIn / bin);
-  nuTau    *= 1. / (nEvent * xMaxIn / bin);
-  nuTauBar *= 1. / (nEvent * xMaxIn / bin);
+  nuE      *= 1. / (nEvent * width);
+  nuEBar   *= 1. / (nEvent * width);
+  nuMu     *= 1. / (nEvent * width);
+  nuMuBar  *= 1. / (nEvent * width);
+  nuTau    *= 1. / (nEvent * width);
+  nuTauBar *= 1. / (nEvent * width);
+  
+
   cout << nuMu << nuMuBar << nuE << nuEBar << nuTau << nuTauBar << endl;
 
   HistPlot hpl("./plot_"+channel+"_"+argv[2]+"_"+location);
