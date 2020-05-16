@@ -170,29 +170,16 @@ bool decay(int& id, Vec4& p4Vec, Event& event){
   // Reset event record and set particle to decay.
   pythia.event.reset();
   pythia.particleData.mayDecay(id, true);
-  if (isLongLived(id)){
-  pythia.particleData.mayDecay(13, true);    //mu+-
-  pythia.particleData.mayDecay(211, true);   //pi+-
-  pythia.particleData.mayDecay(321, true);   //K+-
-  pythia.particleData.mayDecay(130, true);   //K0_L	
-  pythia.particleData.mayDecay(2112, true);  //n
-  }		  
 
   // Decay with Pythia.
   double mass = pythia.particleData.m0(id);
   pythia.event.append(id, 91, 0, 0, p4Vec, mass);
-  if (!pythia.moreDecays()) return false;
-
+  if (!pythia.moreDecays()){
+		 cout << "decay failed for id =" << id << '\n';
+		 return false;
+	}
   // Reset decay of particle.
   pythia.particleData.mayDecay(id, false);
-  
-  if (isLongLived(id)){
-  pythia.particleData.mayDecay(13,  false);    //mu+-
-  pythia.particleData.mayDecay(211, false);   //pi+-
-  pythia.particleData.mayDecay(321, false);   //K+-
-  pythia.particleData.mayDecay(130, false);   //K0_L	
-  pythia.particleData.mayDecay(2112,false);  //n
-  }		  
 
   // Set the event record.
   event = pythia.event;
@@ -212,6 +199,8 @@ bool interact(int& id, Vec4& p4Vec, Event& event){
 
 
   // Define interaction kinematics.
+  // Calculations for interaction/absorption are taken from S.RITZ, D.SECKEL.
+  // Nuclear Physics B304 (1988) 877-908
   double m  = pythia.particleData.m0(id);
   double mc = pythia.particleData.m0(4);
   double qE = p4Vec.e();
@@ -240,6 +229,32 @@ bool interact(int& id, Vec4& p4Vec, Event& event){
   }
   else
   return false;
+}
+
+//==========================================================================
+// Longlived particles lose energy before decaying.
+
+bool RestDecayLongLived(int& id, double inWeight=1.){
+		Event restEvent; 
+	  	double m_id = pythia.particleData.m0(id);
+        Vec4 p4vec  = Vec4(0.,0.,0.,m_id);
+		if ( !decay   (id, p4vec, restEvent)) return false;
+        prettyPrint("restDecay size", restEvent.size());
+  	  	fillFSNeutrino(restEvent, inWeight);
+  		for (int i = 0; i < restEvent.size(); ++i){
+    		if (restEvent[i].isFinal() && inWeight!=0.) {
+      		int idFS = restEvent[i].id();
+	  		if (isLongLived(idFS)){
+			double EFS = restEvent[i].e();
+			double mFS = pythia.particleData.m0(idFS);
+			if ( EFS >= mFS ){
+				if ( !RestDecayLongLived(idFS,inWeight)) return false;
+			   	}
+     	   	}
+    	}
+    }
+  if (DEBUG) cout << "|| Leaving rest decay" << endl;
+  return true;
 }
 
 //==========================================================================
@@ -284,10 +299,6 @@ bool interDecay(int& id, Vec4& p4Vec,string loc="Sun", double inWeight=1.,double
     assert(0);
   }
   double rho = rho_matter;
-  //double rho = 148.9;
-  //if      (loc == "Sun")    rho = 148.9;     //sun center density 148.9 g/cm3 	
-  //else if (loc == "Earth")  rho = 13.08849999999999802; //earth center density 13.088 g/cm3
-  //else if (loc == "Sun-secluded") rho = rho_matter;    //sun density at the mediator decay position
   double N   = 6.0221409e23;
   prettyPrint("rho",  rho);
   prettyPrint("N",  N);
@@ -337,16 +348,16 @@ bool interDecay(int& id, Vec4& p4Vec,string loc="Sun", double inWeight=1.,double
         Vec4 p4vecFS = decayEvent[i].p();
         if ( !interDecay(idFS, p4vecFS,loc, decayWeight, rho,lower_bound) ) return false;
       }
-	  else if (isLongLived(idFS) && lower_bound <= pythia.particleData.m0(idFS)){
-	    Event restDecay;
-		double EFS = pythia.particleData.m0(idFS);
-        Vec4 p4vecFS = Vec4(0.,0.,0.,EFS);
-  		if ( !decay   (idFS, p4vecFS, restDecay) ) return false;
-          prettyPrint("restDecay size", restDecay.size());
-  		  fillFSNeutrino(restDecay, decayWeight);
-	  }
-	}
-  }
+
+	else if (isLongLived(idFS) && lower_bound <= pythia.particleData.m0(idFS)){
+		//RestDecayLongLived(idFS,decayWeight);
+		if ( !RestDecayLongLived(idFS,decayWeight) ) {
+				cout << "restdecaylonglived failed with id = " << idFS << "\n";
+				return false;
+		}		
+		}
+ 	 }
+  }	
 
   // Handle interaction products further.
   for (int i = 0; i < interEvent.size(); ++i){
@@ -365,7 +376,6 @@ bool interDecay(int& id, Vec4& p4Vec,string loc="Sun", double inWeight=1.,double
   return true;
 }
 
-//==========================================================================
 
 // A derived class for (e+ e- ->) GenericResonance -> various final states.
 class Sigma1GenRes : public Sigma1Process {
@@ -403,9 +413,6 @@ int main(int argc, char** argv) {
 
   string channel      = string(argv[1]);
   float xMaxIn       = atof(argv[2]); 
-  //float xMaxIn;
-  //sscanf(argv[2],"%f",&xMaxIn);
-  cout <<  xMaxIn << endl;
   int    nBinIn       = atoi(argv[3]);
   double bin          = double(nBinIn); 
   string location     = string(argv[4]);
@@ -414,9 +421,6 @@ int main(int argc, char** argv) {
   int    seed         = atoi(argv[7]);
   string binscale     = string(argv[8]);
   float lower_edge   = atof(argv[9]);
-  //float lower_edge;
-  //sscanf(argv[9],"%f",&lower_edge);
-  cout << lower_edge << endl;
 
   (void)argc;
   
@@ -436,9 +440,7 @@ int main(int argc, char** argv) {
   //srand(time(NULL));
   //int seed  = rand();
 
-  cout <<  argv[2] << endl;
   pythia.readFile("./cmnd/"+channel+"_"+argv[2]+"_"+process+".cmnd");
-  //pythia.readFile("./cmnd/"+channel+"_"+argv[2]+"_secluded"+".cmnd");
   if (location == "Sun" ||location == "Earth") {
   prettyPrint("Consider interaction at: ",  location);
   pythia.readFile("decays.cmnd");
@@ -452,16 +454,8 @@ int main(int argc, char** argv) {
   pythia.particleData.mayDecay(130, true);   //K0_L	
   pythia.particleData.mayDecay(2112, true);  //n
   }
-  // Intialize hadronization Pythia object.
-  //pythia.readString("SoftQCD:all = on");
-  //pythia.readString("HardQCD:all = on");
   pythia.readString("Random:setSeed = on");
   pythia.readString("Random:seed = "+std::to_string(seed));
-  //pythia.readString("WeakBosonExchange:all = on");
-  //pythia.readString("WeakBosonExchange:ff2ff(t:W) = on");
-  //pythia.readString("WeakSingleBoson:all = on");
-  //pythia.readString("WeakDoubleBoson:all = on");
-  //pythia.readString("WeakBosonAndParton:all = on");
 
   // Initialization.
   if (!DEBUG) pythia.readString("Print:quiet = on");
@@ -531,6 +525,13 @@ int main(int argc, char** argv) {
           	  assert(0);
          	 	};
       	  	}
+	  	else if (isLongLived(idFS) && lower_edge <= pythia.particleData.m0(idFS)){
+  	  	    if ( !RestDecayLongLived(idFS,1.) ){
+          	  if (++iAbort < nAbort) continue;
+          	  cout << " Event generation aborted prematurely, owing to error!\n";
+          	  assert(0);
+				};
+	  		}
      	 }
       }
     }
