@@ -4,6 +4,9 @@
 import numpy as np
 import argparse
 import os 
+import sympy as sym
+from sympy import Symbol
+from sympy.solvers import solve
 
 p = argparse.ArgumentParser(description="parameters needed to make .cmnd files", formatter_class=argparse.RawTextHelpFormatter)
 
@@ -11,8 +14,10 @@ p.add_argument("--channel",default='bb',type=str,
 				help="channel of the DM annihilation")
 p.add_argument("--process",default='ann',type=str,
 				help="annihilation or decay")
-p.add_argument("--mass",default=1000.,type=float,
+p.add_argument("--mass",default="1000.",type=str,
 				help="DM mass")
+p.add_argument("--mass_phi",default="1000.",type=str,
+				help="mediator mass")
 p.add_argument("--bins",default=200,type=int,
 				help="binning")
 p.add_argument("--Nevent",default=1000,type=int,
@@ -24,12 +29,18 @@ p.add_argument("--type",default='-',type=str,
 args = p.parse_args()
 
 channel      = args.channel
-mass	     = args.mass
+str_mass	 = args.mass
 bins	     = args.bins
 Nevent	     = args.Nevent
 location     = args.location
 process      = args.process
 process_type = args.type
+str_mphi     = args.mass_phi
+#me           = pythia.particleData.m0(11)
+me = 0.000511
+
+mass = float(str_mass)
+mphi = float(str_mphi)
 
 if   process == 'ann':
 	Ecm     = 2*mass
@@ -51,8 +62,8 @@ if os.path.exists('./'+location)==False:
 
 
 if process_type == 'secluded':
-	if os.path.exists('./'+location+'_secluded')==False:
-		os.mkdir('./'+location+'_secluded')
+	if os.path.exists('./secluded')==False:
+		os.mkdir('./secluded')
 	Ecm     = mass
 
 if channel in ('nuenue','numunumu','nutaunutau'):
@@ -94,10 +105,11 @@ if channel in ('nuenue','numunumu','nutaunutau'):
 
 
 else:
-	f_name  ='./cmnd/'+channel+'_'+str(mass)+'_'+process+'.cmnd'
-	#if os.path.exists(f_name):
-	#	pass
-	#else:
+	if process_type == 'secluded':
+		f_name  ='./cmnd/'+channel+'_'+str_mass+'_'+str_mphi+'.cmnd'
+	else:
+		f_name  ='./cmnd/'+channel+'_'+str_mass+'_'+process+'.cmnd'
+	
 	f = open(f_name,'w')
 	f.write('Main:numberOfEvents = '+str(Nevent)+'\n')
 	f.write('Main:timesAllowErrors = 5'+'\n') 
@@ -110,9 +122,22 @@ else:
 	f.write('Beams:idA = -11'+'\n')   
 	f.write('Beams:idB = 11'+'\n')    
 	f.write('PDF:lepton = off'+'\n')
-	f.write('Beams:eCM = '+str(Ecm)+'\n')
+	if process_type == 'secluded':
+		x = Symbol('x')
+		y = Symbol('y')
+		px= Symbol('px')
+		py= Symbol('py')
+		solution = solve([x+y-mass,px+py-np.sqrt(mass**2-mphi**2),x**2-px**2-me**2,y**2-py**2-me**2],dict=True)
+		eA = float(solution[0][y])
+		eB = float(solution[0][x])
+		f.write('Beams:frameType = 2'+'\n')
+		f.write('Beams:eA = '+str(eA)+'\n')
+		f.write('Beams:eB = '+str(eB)+'\n')
+		f.write('999999:all = GeneralResonance void 1 0 0 '+str(mphi)+' 1. 0. 0. 0.'+'\n')
 	
-	f.write('999999:all = GeneralResonance void 1 0 0 '+str(Ecm)+' 1. 0. 0. 0.'+'\n')
+	else:
+		f.write('Beams:eCM = '+str(Ecm)+'\n')
+		f.write('999999:all = GeneralResonance void 1 0 0 '+str(Ecm)+' 1. 0. 0. 0.'+'\n')
 	if code[channel] in [21,22,23,25]:
 		f.write('999999:addChannel = 1 1.0 101 '+str(code[channel])+' '+str(code[channel])+'\n') 
 	else:

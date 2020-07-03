@@ -1,8 +1,14 @@
 Author  : Q.R. Liu
 
-Here is how to start running these scripts.
+This is how to generate fluxes without EW correction implimented.
 -----------------------------------------------
-To generate events, just do 
+First do
+```
+make main
+```
+to compile.
+
+To generate events, do 
 ```
 ./run.sh channel mass location process type Nevent bins lower_energy_bound binning_scale
 (density mediator_mass seed) 
@@ -10,15 +16,15 @@ To generate events, just do
 
 --channel <br/>
 channel is the annihilation channel you want to generate:
-Now available ones are:
-{'dd','uu','ss','cc','bb','tt','gg','WW','ZZ','mumu','tautau','nuenue','numunumu','nutaunutau'}
+Available ones are:
+{'dd','uu','ss','cc','bb','tt','gg','WW','ZZ','HH','ee','mumu','tautau','nuenue','numunumu','nutaunutau'}
+polarization is not included here.
 
-
---mass <br/>
+--DM mass <br/>
 DM mass in GeV.
 
 
---locationi <br/>
+--location <br/>
 location of the DM annihilation. Available: "Sun", "Earth", "Halo" 
 
 
@@ -46,18 +52,25 @@ lowest energy (GeV) for the spectrum
 bin the spectrum in linear ("-") or log ("log") scale 
 If the type is "secluded", we need to specify the density and mediator mass at the location of decay.
 
-  -- density (g/cm^3)
 
-  -- mediator_mass (GeV)
+**Parameters for secluded only**
+
+
+-- density (g/cm^3) <br/>
+density of the annihilation/decay location.
+
+
+-- mediator_mass (GeV) <br/>
+mass of the mediator.
 
 
 The last is an optional parameter 
 
 --seed <br/>
-seed for MC generation 
+seed for MC generation, default is 1. 
 
 ------------------------------------------------
-Files are saved in ./location/ with name channel_mass_seed_location_process-#.dat where 
+Files are saved in ./location/ with name channel_dm mass_seed_location_process_binscale-#.dat or ./secluded/ with name channel_dm mass_mediator mass_seed_density_bin scale-#.dat where 
 
 0-nue
 
@@ -72,10 +85,7 @@ Files are saved in ./location/ with name channel_mass_seed_location_process-#.da
 5-nutau_bar 
 
 The first column is energy is GeV. 
-"mass" here is either DM mass or mediator mass depending on the type. 
 
-Generated tables are in ./data with name channel_mass.dat with 10000000 events in form 
-
-|Enu|nu-e|nu-e-bar|nu-mu|nu-mu-bar|nu-tau|nu-tau-bar|
+Generated tables are in ./data with 10000000 events  
 
 Only fluxes at the production here. The flux is dN/dx or dN/dlogx per annihilation/decay depending on the way of binning.

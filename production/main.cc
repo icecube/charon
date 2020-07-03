@@ -56,26 +56,6 @@ bool isBMeson(int& id){
 
 //==========================================================================
 
-// Check if particle is a B Bbar.
-
-bool isBBBar(int& id){
-  int idAbs = abs(id);
-  if (idAbs == 551     || idAbs == 10551   || idAbs == 100551 ||
-      idAbs == 110551  || idAbs == 200551  || idAbs == 210551 ||
-      idAbs == 553     || idAbs == 10553   || idAbs == 20553  ||
-      idAbs == 30553   || idAbs == 100553  || idAbs == 110553 ||
-      idAbs == 120553  || idAbs == 130553  || idAbs == 200553 ||
-      idAbs == 210553  || idAbs == 220553  || idAbs == 300553 ||
-      idAbs == 9000533 || idAbs == 9010533 || idAbs == 555    ||
-      idAbs == 10555   || idAbs == 20555   || idAbs == 100555 ||
-      idAbs == 110555  || idAbs == 120555  || idAbs == 200555 ||
-      idAbs == 557     || idAbs == 100557)
-    return true;
-  else return false;
-}
-
-//==========================================================================
-
 // Check if particle is a B Baryon.
 
 bool isBBaryon(int& id){
@@ -111,7 +91,7 @@ bool isDMeson(int& id){
 
 //==========================================================================
 
-// Check if particle is a C Meson.
+// Check if particle is a C Baryon.
 
 bool isCBaryon(int& id){
   int idAbs = abs(id);
@@ -131,8 +111,11 @@ bool isCBaryon(int& id){
 
 bool isLongLived(int& id){
   int idAbs = abs(id);
-  if (idAbs == 13   || idAbs == 211   || idAbs == 321  || idAbs == 130  ||
-	  idAbs == 2112
+  //if (idAbs == 13   || idAbs == 211   || idAbs == 321  || idAbs == 130  ||
+  //	  idAbs == 2112
+  //	  )
+  //K-, n, pi- are absorbed. K0L should oscillate to K0S 
+  if (idAbs == 13   || id == 211   || id == 321 
 	  )
     return true;
   else return false;
@@ -141,6 +124,8 @@ bool isLongLived(int& id){
 // Fill histogram with final state neutrinos.
 
 void fillFSNeutrino(Event& event, double& weight){
+  //test
+  if (DEBUG) event.list();
   for (int i = 0; i < event.size(); ++i){
     if (event[i].isFinal()) {
       int idFS = event[i].id();
@@ -169,6 +154,7 @@ bool decay(int& id, Vec4& p4Vec, Event& event){
 
   // Reset event record and set particle to decay.
   pythia.event.reset();
+  if (abs(id) != 310)
   pythia.particleData.mayDecay(id, true);
 
   // Decay with Pythia.
@@ -179,6 +165,7 @@ bool decay(int& id, Vec4& p4Vec, Event& event){
 		 return false;
 	}
   // Reset decay of particle.
+  if (abs(id) != 310)
   pythia.particleData.mayDecay(id, false);
 
   // Set the event record.
@@ -199,8 +186,6 @@ bool interact(int& id, Vec4& p4Vec, Event& event){
 
 
   // Define interaction kinematics.
-  // Calculations for interaction/absorption are taken from S.RITZ, D.SECKEL.
-  // Nuclear Physics B304 (1988) 877-908
   double m  = pythia.particleData.m0(id);
   double mc = pythia.particleData.m0(4);
   double qE = p4Vec.e();
@@ -240,7 +225,8 @@ bool RestDecayLongLived(int& id, double inWeight=1.){
         Vec4 p4vec  = Vec4(0.,0.,0.,m_id);
 		if ( !decay   (id, p4vec, restEvent)) return false;
         prettyPrint("restDecay size", restEvent.size());
-  	  	fillFSNeutrino(restEvent, inWeight);
+		double weight = inWeight/(4*M_PI);
+  	  	fillFSNeutrino(restEvent, weight);
   		for (int i = 0; i < restEvent.size(); ++i){
     		if (restEvent[i].isFinal() && inWeight!=0.) {
       		int idFS = restEvent[i].id();
@@ -248,7 +234,7 @@ bool RestDecayLongLived(int& id, double inWeight=1.){
 			double EFS = restEvent[i].e();
 			double mFS = pythia.particleData.m0(idFS);
 			if ( EFS >= mFS ){
-				if ( !RestDecayLongLived(idFS,inWeight)) return false;
+				if ( !RestDecayLongLived(idFS,weight)) return false;
 			   	}
      	   	}
     	}
@@ -259,8 +245,34 @@ bool RestDecayLongLived(int& id, double inWeight=1.){
 
 //==========================================================================
 
+bool RegDecay(int& id, Vec4& p4Vec ,double inWeight=1.){
+	 int idreg;
+	 Event regEvent = pythia.event;
+     if (id == 130) idreg = 310;
+     else if (id == -130) idreg = -310;
+	 if ( !decay   (idreg, p4Vec, regEvent)) return false;
+     prettyPrint("regeneratedDecay size", regEvent.size());
+  	 fillFSNeutrino(regEvent, inWeight);
+  	 for (int i = 0; i < regEvent.size(); ++i){
+    	if (regEvent[i].isFinal() && inWeight!=0.) {
+      		int idFS = regEvent[i].id();
+	  		if (isLongLived(idFS)){
+			double EFS = regEvent[i].e();
+			double mFS = pythia.particleData.m0(idFS);
+			if ( EFS >= mFS ){
+				if ( !RestDecayLongLived(idFS,inWeight)) return false;
+			   	}
+     	   	}
+    	}
+    }
+  if (DEBUG) cout << "|| Leaving regenerated decay" << endl;
+  return true;
+
+}		
+
+
 // Account for interactions as well as decays of a particle.
-// Particle must be either a B Meson, D Meson, B Baryon, C Baryon or B Bbar.
+// Particle must be either a B Meson, D Meson, B Baryon, C Baryon.
 // Events are weighted according to the interaction and decay rates.
 
 bool interDecay(int& id, Vec4& p4Vec,string loc="Sun", double inWeight=1.,double rho_matter=148.9,double lower_bound = 0.){
@@ -350,12 +362,16 @@ bool interDecay(int& id, Vec4& p4Vec,string loc="Sun", double inWeight=1.,double
       }
 
 	else if (isLongLived(idFS) && lower_bound <= pythia.particleData.m0(idFS)){
-		//RestDecayLongLived(idFS,decayWeight);
 		if ( !RestDecayLongLived(idFS,decayWeight) ) {
 				cout << "restdecaylonglived failed with id = " << idFS << "\n";
 				return false;
-		}		
+			}		
 		}
+
+    else if (abs(idFS) == 130 && lower_bound <= pythia.particleData.m0(idFS)){
+         	 Vec4 p4Vec_reg = decayEvent[i].p();
+			 if (!RegDecay(idFS, p4Vec_reg , decayWeight)) return false;
+			}		
  	 }
   }	
 
@@ -412,7 +428,7 @@ int main(int argc, char** argv) {
   pythia.setSigmaPtr(sigma1GenRes);
 
   string channel      = string(argv[1]);
-  float xMaxIn       = atof(argv[2]); 
+  float  xMaxIn       = atof(argv[2]); 
   int    nBinIn       = atoi(argv[3]);
   double bin          = double(nBinIn); 
   string location     = string(argv[4]);
@@ -420,7 +436,8 @@ int main(int argc, char** argv) {
   double rho_matter   = atof(argv[6]);   //density of mediator decay position
   int    seed         = atoi(argv[7]);
   string binscale     = string(argv[8]);
-  float lower_edge   = atof(argv[9]);
+  float  lower_edge   = atof(argv[9]);
+  string secluded     = string(argv[11]);
 
   (void)argc;
   
@@ -435,17 +452,16 @@ int main(int argc, char** argv) {
   nuTau   = Hist("tau neutrino spectrum",           nBinIn, lower_edge, xMaxIn, Log);
   nuTauBar= Hist("anti tau neutrino spectrum",      nBinIn, lower_edge, xMaxIn, Log);
 
-  // Read in the rest of the settings and data from a separate file.
   
-  //srand(time(NULL));
-  //int seed  = rand();
-
-  pythia.readFile("./cmnd/"+channel+"_"+argv[2]+"_"+process+".cmnd");
-  if (location == "Sun" ||location == "Earth") {
+  if (secluded == "secluded")
+	pythia.readFile("./cmnd/"+channel+"_"+argv[2]+"_"+argv[10]+".cmnd");
+  else
+  	pythia.readFile("./cmnd/"+channel+"_"+argv[2]+"_"+process+".cmnd");
+  if (rho_matter != 0.) {
   prettyPrint("Consider interaction at: ",  location);
   pythia.readFile("decays.cmnd");
   }
-  else if (location == "Halo"){
+  else if (rho_matter == 0.){
   prettyPrint("No interaction at: ",  location);
   //Long-lived particles should decay
   pythia.particleData.mayDecay(13, true);    //mu+-
@@ -454,8 +470,16 @@ int main(int argc, char** argv) {
   pythia.particleData.mayDecay(130, true);   //K0_L	
   pythia.particleData.mayDecay(2112, true);  //n
   }
+  // Intialize hadronization Pythia object.
+  //pythia.readString("SoftQCD:all = on");
+  pythia.readString("HardQCD:all = on");
   pythia.readString("Random:setSeed = on");
   pythia.readString("Random:seed = "+std::to_string(seed));
+  pythia.readString("WeakBosonExchange:all = on");
+  pythia.readString("WeakBosonExchange:ff2ff(t:W) = on");
+  pythia.readString("WeakSingleBoson:all = on");
+  pythia.readString("WeakDoubleBoson:all = on");
+  pythia.readString("WeakBosonAndParton:all = on");
 
   // Initialization.
   if (!DEBUG) pythia.readString("Print:quiet = on");
@@ -502,6 +526,8 @@ int main(int argc, char** argv) {
     if (DEBUG) cout << "======================================" << endl;
 
     // Loop over all particles and analyze the final-state ones.
+    //test
+	if (DEBUG) event.list();
     for (int i = 0; i < event.size(); ++i){
       if (event[i].isFinal()) {
         int idFS   = event[i].id();
@@ -532,7 +558,15 @@ int main(int argc, char** argv) {
           	  assert(0);
 				};
 	  		}
-     	 }
+        else if (abs(idFS) == 130 && lower_edge <= pythia.particleData.m0(idFS)){
+         	 Vec4 p4Vec_reg = event[i].p();
+			 if (!RegDecay(idFS, p4Vec_reg ,1.)){
+          	  if (++iAbort < nAbort) continue;
+          	  cout << " Event generation aborted prematurely, owing to error!\n";
+          	  assert(0);
+				};
+			}		
+		}
       }
     }
     // End of event loop.
@@ -542,10 +576,14 @@ int main(int argc, char** argv) {
   // Rescale according to number of events and binning.
   pythia.stat();
 
-  double width; 
-  if (binscale == "log")  width = (log10 (xMaxIn / xMaxIn) - log10 (lower_edge / xMaxIn)) / bin; 
-  else 					  width = (xMaxIn - lower_edge) / (xMaxIn * bin);
-  
+  double width;
+  string yaxis; 
+  if (binscale == "log")  {width = (log10 (xMaxIn / xMaxIn) - log10 (lower_edge / xMaxIn)) / bin;
+		  				   yaxis = "$\\mathrm{d}N / \\mathrm{d}logx$"; 
+  } 
+  else 					  {width = (xMaxIn - lower_edge) / (xMaxIn * bin);
+		  				   yaxis = "$\\mathrm{d}N / \\mathrm{d}x$"; 
+  }
   nuE      *= 1. / (nEvent * width);
   nuEBar   *= 1. / (nEvent * width);
   nuMu     *= 1. / (nEvent * width);
@@ -554,22 +592,30 @@ int main(int argc, char** argv) {
   nuTauBar *= 1. / (nEvent * width);
   
 
-  cout << nuMu << nuMuBar << nuE << nuEBar << nuTau << nuTauBar << endl;
-
-  HistPlot hpl("./plot_"+channel+"_"+argv[2]+"_"+location);
-  if (rho_matter == 148.9 || rho_matter==13.08849999999999802|| rho_matter==0.)
-  {hpl.frame("./"+location+"/"+channel+"_"+argv[2]+"_"+std::to_string(seed)+"_"+location+"_"+process, "Particle energy spectra", "$E$ (GeV)",
-      "$\\mathrm{d}N / \\mathrm{d}E$ (GeV$^{-1}$)");}
-  else	
-  {hpl.frame("./"+location+"_secluded/"+channel+"_"+argv[2]+"_"+std::to_string(seed)+"_"+location+"_"+argv[6]+"_"+process, "Particle energy spectra", "$E$ (GeV)",
-      "$\\mathrm{d}N / \\mathrm{d}E$ (GeV$^{-1}$)");}
+  cout << nuE << nuEBar << nuMu << nuMuBar << nuTau << nuTauBar << endl;
+  
+  if (secluded == "secluded")
+  {HistPlot hpl("./plot_"+channel+"_"+argv[2]+"_"+argv[10]);
+  hpl.frame("./secluded/"+channel+"_"+argv[2]+"_"+argv[10]+"_"+std::to_string(seed)+"_"+argv[6]+"_"+binscale, "Particle energy spectra", "$E$ (GeV)", yaxis);
   hpl.add(nuE,      "-", "$\\nu_e$");
   hpl.add(nuEBar,   "-", "$\\bar{\\nu}_e$");
   hpl.add(nuMu,     "-", "$\\nu_\\mu$");
   hpl.add(nuMuBar,  "-", "$\\bar{\\nu}_\\mu$");
   hpl.add(nuTau,    "-", "$\\nu_\\tau$");
   hpl.add(nuTauBar, "-", "$\\bar{\\nu}_\\tau}$");
-  hpl.plot(true); 
+  hpl.plot(true);} 
+  
+  else 
+  {HistPlot hpl("./plot_"+channel+"_"+argv[2]+"_"+location);
+  hpl.frame("./"+location+"/"+channel+"_"+argv[2]+"_"+std::to_string(seed)+"_"+location+"_"+process+"_"+binscale, "Particle energy spectra", "$E$ (GeV)", yaxis);
+  hpl.add(nuE,      "-", "$\\nu_e$");
+  hpl.add(nuEBar,   "-", "$\\bar{\\nu}_e$");
+  hpl.add(nuMu,     "-", "$\\nu_\\mu$");
+  hpl.add(nuMuBar,  "-", "$\\bar{\\nu}_\\mu$");
+  hpl.add(nuTau,    "-", "$\\nu_\\tau$");
+  hpl.add(nuTauBar, "-", "$\\bar{\\nu}_\\tau}$");
+  hpl.plot(true);} 
+  
 
   delete sigma1GenRes;
   return 0;
