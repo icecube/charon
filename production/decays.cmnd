@@ -1,6 +1,3 @@
-!! are excited states
-!!! have no lifetime measured
-!!!! fast decay
 !Don't decay B mesons
 511:mayDecay   = false        
 521:mayDecay   = false        
@@ -62,7 +59,7 @@
 5542:mayDecay = false
 5544:mayDecay = false
 5554:mayDecay = false
-!!charmed meson
+!charmed meson
 411:mayDecay   = false
 421:mayDecay   = false
 431:mayDecay   = false
