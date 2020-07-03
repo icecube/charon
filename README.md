@@ -13,16 +13,16 @@ Indirect detection which detects Standard Model (SM) particles produced by dark 
 ## Features
 * **DM Capture**: Capture and annihilation rate calculation of dark matter.  
 	Things related to dark matter capture are in the [`capture`](capture/) folder.
-* **Flux at Production**: We provide neutrino fluxes at production using PYTHIA8.2 with electroweak correction from [`Bauer *et al*.`](https://arxiv.org/abs/20xx.xxxxx).
+* **Flux at Production**: We provide neutrino fluxes at production using PYTHIA8.2 with electroweak correction from [`Bauer et al.`](https://arxiv.org/abs/20xx.xxxxx).
     Things related to neutrino fluxes at productions are in the [`production`](production/) folder. Fluxes with and without electroweak correction are in [`production/data`](production/data/).
 * **Propagation**: Propagate initial fluxs to Earth or the detector.     
-	Things related to neutrino propagation are in the [`propagation`](propagation/) folder.
+	Things related to neutrino propagation are in the [`propagate`](propagate/) folder.
 * **Secluded DM**: Besides the standard case, DMFlux also includes the possibility of a secluded dark matter sector which introduces a long-lived mediator. 
  
 
 ## Dependencies
 * DMFlux needs a modified version of nuSQuIDs which can be installed from 
-  [`nuSQuIDS branch`](https://github.com/qrliu/nuSQuIDS)
+  [`nuSQuIDS branch`](https://github.com/qrliu/nuSQuIDS) and please make sure python interface is activated.
 * Python
 * NumPy
 * Scipy
