@@ -575,11 +575,12 @@ int main(int argc, char** argv) {
   nuTau    *= 1. / (nEvent * width);
   nuTauBar *= 1. / (nEvent * width);
   
-
+  if (DEBUG){
   cout << nuE << nuEBar << nuMu << nuMuBar << nuTau << nuTauBar << endl;
+  }
   
   if (secluded == "secluded")
-  {HistPlot hpl("./plot_"+channel+"_"+argv[2]+"_"+argv[10]);
+  {HistPlot hpl("./plot_"+channel+"_"+argv[2]+"_"+argv[10]+"_"+argv[6]);
   hpl.frame("./secluded/"+channel+"_"+argv[2]+"_"+argv[10]+"_"+std::to_string(seed)+"_"+argv[6]+"_"+binscale, "Particle energy spectra", "$E$ (GeV)", yaxis);
   hpl.add(nuE,      "-", "$\\nu_e$");
   hpl.add(nuEBar,   "-", "$\\bar{\\nu}_e$");
