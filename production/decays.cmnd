@@ -1,28 +1,28 @@
-!Don't decay B mesons
+! Don't decay B mesons
 511:mayDecay   = false        
 521:mayDecay   = false        
-10511:mayDecay = false        
-10521:mayDecay = false        
+!10511:mayDecay = false       
+!10521:mayDecay = false       
 !513:mayDecay   = false       
 !523:mayDecay   = false       
-10513:mayDecay = false        
-10523:mayDecay = false        
-20513:mayDecay = false        
-20523:mayDecay = false        
-515:mayDecay   = false        
-525:mayDecay   = false        
+!10513:mayDecay = false       
+!10523:mayDecay = false       
+!20513:mayDecay = false       
+!20523:mayDecay = false       
+!515:mayDecay   = false       
+!525:mayDecay   = false       
 531:mayDecay   = false        
-10531:mayDecay = false        
+!10531:mayDecay = false       
 !533:mayDecay   = false       
-10533:mayDecay = false        
-20533:mayDecay = false        
-535:mayDecay   = false        
+!10533:mayDecay = false       
+!20533:mayDecay = false       
+!535:mayDecay   = false       
 541:mayDecay   = false        
-10541:mayDecay = false        
+!10541:mayDecay = false       
 !543:mayDecay   = false       
-10543:mayDecay = false        
-20543:mayDecay = false        
-545:mayDecay   = false        
+!10543:mayDecay = false       
+!20543:mayDecay = false       
+!545:mayDecay   = false       
 ! Don't decay B baryons
 5122:mayDecay = false
 !5112:mayDecay = false
@@ -59,13 +59,13 @@
 5542:mayDecay = false
 5544:mayDecay = false
 5554:mayDecay = false
-!charmed meson
+!Don't decay charmed meson
 411:mayDecay   = false
 421:mayDecay   = false
 431:mayDecay   = false
 !10411:mayDecay = false
 !10421:mayDecay = false
-413:mayDecay   = false
+!413:mayDecay   = false
 !423:mayDecay   = false
 !10413:mayDecay = false
 !10423:mayDecay = false
@@ -78,7 +78,7 @@
 !10433:mayDecay = false
 !20433:mayDecay = false
 !435:mayDecay   = false
-!charmed baryon
+!Don't decay charmed baryon
 4122:mayDecay = false
 !4222:mayDecay = false
 !4212:mayDecay = false
@@ -88,7 +88,7 @@
 !4114:mayDecay = false
 4232:mayDecay = false
 4132:mayDecay = false
-4332:mayDecay = false
+!4322:mayDecay = false
 !4312:mayDecay = false
 !4324:mayDecay = false
 !4314:mayDecay = false
@@ -101,7 +101,7 @@
 4432:mayDecay = false
 4434:mayDecay = false
 4444:mayDecay = false
-!long-lived particles
+
 13:mayDecay = false
 130:mayDecay = false
 211:mayDecay = false

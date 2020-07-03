@@ -42,14 +42,7 @@ void prettyPrint(string name, T value){
 
 bool isBMeson(int& id){
   int idAbs = abs(id);
-  if (idAbs == 511    || idAbs == 521    || idAbs == 10511  ||
-      idAbs == 10521  || idAbs == 513    || idAbs == 523    ||
-      idAbs == 10513  || idAbs == 10523  || idAbs == 20513  ||
-      idAbs == 20523  || idAbs == 515    || idAbs == 525    ||
-      idAbs == 531    || idAbs == 10531  || idAbs == 533    ||
-      idAbs == 10533  || idAbs == 20533  || idAbs == 535    ||
-      idAbs == 541    || idAbs == 10541  || idAbs == 543    ||
-      idAbs == 10543  || idAbs == 20543  || idAbs == 545)
+  if (idAbs == 511    || idAbs == 521    || idAbs == 531    || idAbs == 541 )      
     return true;
   else return false;
 }
@@ -60,15 +53,12 @@ bool isBMeson(int& id){
 
 bool isBBaryon(int& id){
   int idAbs = abs(id);
-  if (idAbs == 5122 || idAbs == 5112 || idAbs == 5212 || idAbs == 5222 ||
-      idAbs == 5114 || idAbs == 5214 || idAbs == 5224 || idAbs == 5132 ||
-      idAbs == 5232 || idAbs == 5312 || idAbs == 5322 || idAbs == 5314 ||
-      idAbs == 5324 || idAbs == 5332 || idAbs == 5334 || idAbs == 5142 ||
-      idAbs == 5242 || idAbs == 5412 || idAbs == 5422 || idAbs == 5414 ||
-      idAbs == 5424 || idAbs == 5342 || idAbs == 5432 || idAbs == 5434 ||
-      idAbs == 5442 || idAbs == 5444 || idAbs == 5512 || idAbs == 5522 ||
-      idAbs == 5514 || idAbs == 5524 || idAbs == 5532 || idAbs == 5534 ||
-      idAbs == 5542 || idAbs == 5544 || idAbs == 5554)
+  if (idAbs == 5122 || idAbs == 5132 || idAbs == 5232 || idAbs == 5332 ||
+      idAbs == 5142 || idAbs == 5242 || idAbs == 5412 || idAbs == 5422 || 
+	  idAbs == 5414 || idAbs == 5424 || idAbs == 5342 || idAbs == 5432 || 
+	  idAbs == 5434 || idAbs == 5442 || idAbs == 5444 || idAbs == 5512 || 
+	  idAbs == 5522 || idAbs == 5514 || idAbs == 5524 || idAbs == 5532 || 
+	  idAbs == 5534 || idAbs == 5542 || idAbs == 5544 || idAbs == 5554)
     return true;
   else return false;
 }
@@ -79,12 +69,7 @@ bool isBBaryon(int& id){
 
 bool isDMeson(int& id){
   int idAbs = abs(id);
-  if (idAbs == 411    || idAbs == 421    || idAbs == 431    ||
-      idAbs == 10411  || idAbs == 10421  || idAbs == 413    ||
-      idAbs == 423    || idAbs == 10413  || idAbs == 10423  ||
-      idAbs == 20413  || idAbs == 20423  || idAbs == 415    ||
-      idAbs == 425    || idAbs == 10431  || idAbs == 433    ||
-      idAbs == 10433  || idAbs == 20433  || idAbs == 435)
+  if (idAbs == 411    || idAbs == 421    || idAbs == 431)    
     return true;
   else return false;
 }
@@ -95,12 +80,9 @@ bool isDMeson(int& id){
 
 bool isCBaryon(int& id){
   int idAbs = abs(id);
-  if (idAbs == 4123 || idAbs == 4222 || idAbs == 4212 || idAbs == 4112 ||
-      idAbs == 4224 || idAbs == 4214 || idAbs == 4114 || idAbs == 4232 ||
-      idAbs == 4132 || idAbs == 4322 || idAbs == 4312 || idAbs == 4324 ||
-      idAbs == 4314 || idAbs == 4332 || idAbs == 4334 || idAbs == 4412 ||
-      idAbs == 4422 || idAbs == 4414 || idAbs == 4424 || idAbs == 4432 ||
-      idAbs == 4434 || idAbs == 4444)
+  if (idAbs == 4122 || idAbs == 4232 || idAbs == 4132 || idAbs == 4332 ||
+      idAbs == 4412 || idAbs == 4422 || idAbs == 4414 || idAbs == 4424 || 
+	  idAbs == 4432 || idAbs == 4434 || idAbs == 4444)
     return true;
   else return false;
 }
@@ -497,7 +479,8 @@ int main(int argc, char** argv) {
   for (int iEvent = 0; iEvent < nEvent; ++iEvent) {
 
     // Progress bar
-    cout << "[";
+    if (DEBUG) {
+	cout << "[";
     double progress = (iEvent / (double)nEvent);
     int pos = barWidth * progress;
     for (int i = 0; i < barWidth; ++i) {
@@ -507,6 +490,7 @@ int main(int argc, char** argv) {
     }
     std::cout << "] " << int(progress * 100.0) << " %\r";
     std::cout.flush();
+    }
 
     // Generate events. Quit if many failures.
     if (DEBUG) cout << "======================================" << endl;
