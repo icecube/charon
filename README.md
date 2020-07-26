@@ -39,7 +39,12 @@ Unzip the xsec.zip file in [`charon/xsec/`](charon/xsec) first.
 unzip ./charon/xsec/xsec.zip
 ```
 
-data at production can be downloaded from [`charon data`](https://icecube.wisc.edu/~qliu/charon/). These data are supposed to be put into [`charon/data/`](charon/data) before installation.
+data at production can be downloaded from [`charon data`](https://icecube.wisc.edu/~qliu/charon/). After downloading the data please create a data folder in [`charon/`](charon/) by doing
+```
+mkdir charon/data/
+``` 
+
+The data are supposed to be put into [`charon/data/`](charon/data) before installation.
 
 χarον can be installed using the following command
 ```
@@ -50,14 +55,13 @@ If you want to generate flux at production yourself, please go to [`production`]
  
 ## Examples
 You can find examples of how to run χαρον in the 
-[`examples`](examples) folder.
+[`examples`](examples/) folder.
 
 ## Citation
-If you use χarον in published work, please cite \\
+If you use χarον in published work, please cite:  
 preprint: arXiv:20xx.xxxxx.
 
 
+ʕ•̫͡•ʕ•͓͡•ʔ-̫͡-ʕ•̫͡•ʔʔ-̫͡-ʔฅʕ•̫͡•ʕ•͓͡•ʔ-̫͡-ʕ•̫͡•ʔʔ-̫͡-ʔฅʕ•̫͡•ʕ•͓͡•ʔ-̫͡-ʕ•̫͡•ʔʔ-̫͡-ʔฅʕ•̫͡•ʕ•͓͡•ʔ-̫͡-ʕ•̫͡•ʔʔ-̫͡-ʔฅʕ•̫͡•ʕ•͓͡•ʔ-̫͡-ʕ•̫͡•ʔʔ-̫͡-ʔ
+
 For any questions, issues and comments, please contact qliu@icecube.wisc.edu.
-
-
-ʕ•̫͡•ʕ•͓͡•ʔ-̫͡-ʕ•̫͡•ʔʔ-̫͡-ʔฅʕ•̫͡•ʕ•͓͡•ʔ-̫͡-ʕ•̫͡•ʔʔ-̫͡-ʔฅʕ•̫͡•ʕ•͓͡•ʔ-̫͡-ʕ•̫͡•ʔʔ-̫͡-ʔ
