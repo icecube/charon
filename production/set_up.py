@@ -36,7 +36,6 @@ location     = args.location
 process      = args.process
 process_type = args.type
 str_mphi     = args.mass_phi
-#me           = pythia.particleData.m0(11)
 me = 0.000511
 
 mass = float(str_mass)
@@ -55,8 +54,6 @@ if os.path.exists('./output')   ==False:
 	os.mkdir('./output')
 if os.path.exists('./cmnd')     ==False:
 	os.mkdir('./cmnd')
-if os.path.exists('./plot')     ==False:
-	os.mkdir('./plot')
 if os.path.exists('./'+location)==False:
 	os.mkdir('./'+location)
 
@@ -70,7 +67,7 @@ if channel in ('nuenue','numunumu','nutaunutau'):
 	binning    = np.linspace(0.,mass,bins+1)
 	bin_center = (binning[1:]+binning[:-1])/2.
 	for i in range(6):
-		flux_path = './{}/{}_{}_1_{}_{}-{}.dat'.format(location,channel,mass,location,process,i)	
+		flux_path = './{}/{}_{}_{}_{}-{}.dat'.format(location,channel,mass,location,process,i)	
 		f = open(flux_path,'w')
 		if i == nu_number[channel] or i==nu_number[channel]+1 : 
 			diff = np.diff(binning)	

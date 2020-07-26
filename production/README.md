@@ -14,6 +14,13 @@ To generate events, do
 (density mediator_mass seed) 
 ```
 
+For a fast secluded run, do
+```
+./run_secluded.sh channel mass location Nevent bins lower_energy_bound binning_scale mediator_mass (seed)
+```
+It generates fluxes at densities from 0. to 155 g/cm^3. 
+
+
 --channel <br/>
 channel is the annihilation channel you want to generate:
 Available ones are:
@@ -53,11 +60,11 @@ bin the spectrum in linear ("-") or log ("log") scale
 If the type is "secluded", we need to specify the density and mediator mass at the location of decay.
 
 
-**Parameters for secluded only**
+**Parameters for secluded**
 
 
 -- density (g/cm^3) <br/>
-density of the annihilation/decay location.
+density of the annihilation/decay location. 
 
 
 -- mediator_mass (GeV) <br/>
@@ -70,7 +77,7 @@ The last is an optional parameter
 seed for MC generation, default is 1. 
 
 ------------------------------------------------
-Files are saved in ./location/ with name channel_dm mass_seed_location_process_binscale-#.dat or ./secluded/ with name channel_dm mass_mediator mass_seed_density_bin scale-#.dat where 
+Files are saved in ./location/ with name channel_dm mass_location_process_binscale-#.dat or ./secluded/ with name channel_dm mass_mediator mass_seed_density_bin scale-#.dat where 
 
 0-nue
 
@@ -86,6 +93,8 @@ Files are saved in ./location/ with name channel_dm mass_seed_location_process_b
 
 The first column is energy is GeV. 
 
-Generated tables are in ./data with 10000000 events  
+Generated tables are in ../charon/data with 10000000 events without EW correction  
 
 Only fluxes at the production here. The flux is dN/dx or dN/dlogx per annihilation/decay depending on the way of binning.
+
+For secluded DM case, fluxes at production at different locations with different matter densities along the line of sight are supposed to be generated. 

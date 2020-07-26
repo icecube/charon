@@ -1,12 +1,9 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 import io
 import os
 from setuptools import setup, find_packages
 
-NAME = 'DMFlux'
-DESCRIPTION = 'DMFlux: A package for neutrino flux generation from WIMP annihilation/decay' 
+NAME = 'charon'
+DESCRIPTION = 'Charon: A package for neutrino flux generation from WIMP annihilation/decay' 
 MAINTAINER = 'Qinrui Liu'
 MAINTAINER_EMAIL = 'qliu@icecube.wisc.edu'
 URL = 'https://github.com/IceCubeOpenSource/DMFlux'
@@ -29,7 +26,7 @@ LONG_DESCRIPTION = read(os.path.join(here,'README.md'))
 
 # Want to read in package version number from __version__.py
 about = {}
-with io.open(os.path.join(here, './', '__version__.py'), encoding='utf-8') as f:
+with io.open(os.path.join(here, 'charon', '__version__.py'), encoding='utf-8') as f:
     exec(f.read(), about)
     VERSION = about['__version__']
 
@@ -52,7 +49,6 @@ setup(
         'Topic :: Scientific/Engineering',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
@@ -63,9 +59,7 @@ setup(
     packages=find_packages(),
     install_requires=INSTALL_REQUIRES,
     setup_requires=['setuptools>=38.6.0'],
-    scripts=[
-        'capture/DM.py',
-        'propagate/DMFlux.py',
-    ]
+	package_data={"charon":["data/*.hdf5","models/*.dat","xsec/*.dat"]
+			}
 )
 
