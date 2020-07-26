@@ -1,4 +1,4 @@
-# χarον
+# χarον (charon)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![arXiv](https://img.shields.io/badge/arXiv-20xx.xxxxx%20-green.svg)](https://arxiv.org/abs/20xx.xxxxx)
@@ -54,8 +54,8 @@ python setup.py install
 If you want to generate flux at production yourself, please go to [`production`](production/) and see [`README`](production/README.md) file there. 
  
 ## Examples
-You can find examples of how to run χαρον in the 
-[`examples`](examples/) folder.
+You can find examples of how to run χaroν in the 
+[`example`](example/) folder.
 
 ## Citation
 If you use χarον in published work, please cite:  
