@@ -581,7 +581,7 @@ int main(int argc, char** argv) {
   
   if (secluded == "secluded")
   {HistPlot hpl("./plot_"+channel+"_"+argv[2]+"_"+argv[10]+"_"+argv[6]);
-  hpl.frame("./secluded/"+channel+"_"+argv[2]+"_"+argv[10]+"_"+std::to_string(seed)+"_"+argv[6]+"_"+binscale, "Particle energy spectra", "$E$ (GeV)", yaxis);
+  hpl.frame("./secluded/"+channel+"_"+argv[2]+"_"+argv[10]+"_"+argv[6]+"_"+binscale, "Particle energy spectra", "$E$ (GeV)", yaxis);
   hpl.add(nuE,      "-", "$\\nu_e$");
   hpl.add(nuEBar,   "-", "$\\bar{\\nu}_e$");
   hpl.add(nuMu,     "-", "$\\nu_\\mu$");
@@ -592,7 +592,7 @@ int main(int argc, char** argv) {
   
   else 
   {HistPlot hpl("./plot_"+channel+"_"+argv[2]+"_"+location);
-  hpl.frame("./"+location+"/"+channel+"_"+argv[2]+"_"+std::to_string(seed)+"_"+location+"_"+process+"_"+binscale, "Particle energy spectra", "$E$ (GeV)", yaxis);
+  hpl.frame("./"+location+"/"+channel+"_"+argv[2]+"_"+location+"_"+process+"_"+binscale, "Particle energy spectra", "$E$ (GeV)", yaxis);
   hpl.add(nuE,      "-", "$\\nu_e$");
   hpl.add(nuEBar,   "-", "$\\bar{\\nu}_e$");
   hpl.add(nuMu,     "-", "$\\nu_\\mu$");
