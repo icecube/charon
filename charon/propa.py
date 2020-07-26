@@ -600,7 +600,7 @@ def propagate(iniflux,Ein,Eout,location_ini,location_end,theta_12=33.82,theta_23
                             
 	flavor_list = {0:'nu_e',1:'nu_e_bar',2:'nu_mu',3:'nu_mu_bar',4:'nu_tau',5:'nu_tau_bar'}	
 	if xsec == None:
-		xsec = nsq.NeutrinoDISCrossSectionsFromTables('../propagate/xsec/nusigma_')
+		xsec = nsq.NeutrinoDISCrossSectionsFromTables(dirpath+'/xsec/nusigma_')
 		nuSQ = nsq.nuSQUIDS(Ein*pc.GeV,3,nsq.NeutrinoType.both,interactions,xsec)
 	else:
 		xsec = nsq.NeutrinoDISCrossSectionsFromTables(xsec)

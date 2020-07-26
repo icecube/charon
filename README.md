@@ -48,6 +48,8 @@ cd ./charon/data/
 wget --no-check-certificate https://icecube.wisc.edu/~qliu/charon/SpectraEW.hdf5
 
 wget --no-check-certificate https://icecube.wisc.edu/~qliu/charon/Spectra_noEW.hdf5
+
+cd ../../
 ``` 
 
 
