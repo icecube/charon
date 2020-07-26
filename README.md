@@ -36,12 +36,12 @@ Indirect detection which detects Standard Model (SM) particles produced by dark 
 ## Installation
 Unzip the xsec.zip file in [`charon/xsec/`](charon/xsec) first. 
 ```
-unzip ./charon/xsec/xsec.zip
+unzip ./charon/xsec/xsec.zip -d charon/xsec/
 ```
 
-data at production can be downloaded from [`charon data`](https://icecube.wisc.edu/~qliu/charon/). After downloading the data please create a data folder in [`charon/`](charon/) by doing
+Data at production can be downloaded from [`charon data`](https://icecube.wisc.edu/~qliu/charon/). After downloading the data please create a data folder in [`charon/`](charon/) by doing
 ```
-mkdir charon/data/
+mkdir ./charon/data/
 ``` 
 
 The data are supposed to be put into [`charon/data/`](charon/data) before installation.
