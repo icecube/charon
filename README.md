@@ -39,12 +39,17 @@ Unzip the xsec.zip file in [`charon/xsec/`](charon/xsec) first.
 unzip ./charon/xsec/xsec.zip -d charon/xsec/
 ```
 
-Data at production can be downloaded from [`charon data`](https://icecube.wisc.edu/~qliu/charon/). After downloading the data please create a data folder in [`charon/`](charon/) by doing
+Data at production can be downloaded from https://icecube.wisc.edu/~qliu/charon/. The data are supposed to be put into [`charon/data/`](charon/data) before installation.
 ```
 mkdir ./charon/data/
+
+cd ./charon/data/
+
+wget --no-check-certificate https://icecube.wisc.edu/~qliu/charon/SpectraEW.hdf5
+
+wget --no-check-certificate https://icecube.wisc.edu/~qliu/charon/Spectra_noEW.hdf5
 ``` 
 
-The data are supposed to be put into [`charon/data/`](charon/data) before installation.
 
 χarον can be installed using the following command
 ```
