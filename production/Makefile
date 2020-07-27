@@ -1,7 +1,7 @@
-INCDIR = -I$(PYTHIA8)/include
+INCDIR = -I$(shell pythia8-config --includedir)
 LIBS = $(shell pythia8-config --libs) $(shell gsl-config --libs)
 CC = g++
-CFLAGS = -std=c++11 -O2 -pedantic -W -Wall -Wshadow -fPIC -Wl,-rpath,$(PYTHIA8)/lib $(shell gsl-config --cflags)
+CFLAGS = -std=c++11 -O2 -pedantic -W -Wall -Wshadow -fPIC -Wl,-rpath, $(shell gsl-config --cflags)
 SRC = $(wildcard ./*.cc)
 TARGET = $(patsubst %.cc,%,$(SRC))
 OUT = $(patsubst %.cc,%.out,$(SRC))
@@ -12,10 +12,5 @@ all: $(TARGET)
 $(TARGET): $(SRC)
 	$(CC) $(CFLAGS) $@.cc -o $@ $(INCDIR) $(LIBS)
 clean:
-	rm -rf $(TARGET) $(OUT)
-	rm -f *.dat
-	rm -f *.py
-	rm -f *.pdf
-run: $(OUT)
-$(OUT): $(TARGET)
+	rm -rf $(TARGET) 
 	./$(patsubst %.out,%,$@) $(patsubst %.out,%.cmnd,$@) > $@

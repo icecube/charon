@@ -1,7 +1,13 @@
-Author  : Q.R. Liu
-
-This is how to generate fluxes without EW correction implimented.
+This is how to generate fluxes without EW correction implemented.
 -----------------------------------------------
+
+## Dependencies
+* C++11 or higher
+* [`Pythia 8`](http://home.thep.lu.se/Pythia/)
+
+
+## Flux Generating
+
 First do
 ```
 make main
@@ -97,4 +103,7 @@ Generated tables are in ../charon/data with 10000000 events without EW correctio
 
 Only fluxes at the production here. The flux is dN/dx or dN/dlogx per annihilation/decay depending on the way of binning.
 
-For secluded DM case, fluxes at production at different locations with different matter densities along the line of sight are supposed to be generated. 
+For secluded DM case, fluxes at production at different locations with different matter densities along the line of sight are supposed to be generated.
+
+
+ʕ•̫͡•ʕ•͓͡•ʔ-̫͡-ʕ•̫͡•ʔʔ-̫͡-ʔฅʕ•̫͡•ʕ•͓͡•ʔ-̫͡-ʕ•̫͡•ʔʔ-̫͡-ʔฅʕ•̫͡•ʕ•͓͡•ʔ-̫͡-ʕ•̫͡•ʔʔ-̫͡-ʔฅʕ•̫͡•ʕ•͓͡•ʔ-̫͡-ʕ•̫͡•ʔʔ-̫͡-ʔฅʕ•̫͡•ʕ•͓͡•ʔ-̫͡-ʕ•̫͡•ʔʔ-̫͡-ʔ 
