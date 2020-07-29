@@ -181,12 +181,13 @@ def DMSunCaptureRateGould(DM_mass,DM_cs,DM_rho=0.3,vel_rot=220.,model=None,n =No
         path = '../charon/models/'
         data = np.genfromtxt(path+model+'.dat')
         m    = data[:,0]
-        m_sum= sum(m)
+        m_shell = np.append(m[0],(m[1:]-m[:-1]))
+        
         if model in ['struct_b16_agss09', 'struct_b16_gs98']:                
             elements        = {0:'H1', 1:'He4',2:'He3',3:'C12',4:'C13',5:'N14',6:'N15',7:'O16',8:'O17',9:'O18',10:'Ne',11:'Na',12:'Mg',13:'Al',14:'Si',15:'P',16:'S',17:'Cl',18:'Ar',19:'K',20:'Ca',21:'Sc',22:'Ti',23:'V',24:'Cr',25:'Mn',26:'Fe',27:'Co',28:'Ni'}  
             mass_num        = [1.0,4.0,3.0,12.0,13.0,14.0,15.0,16.0,17.0,18.0,20.0,23.0,24.0,27.0,28.0,31.0,32.0,35.0,40.0,39.0,40.0,45.0,48.0,51.0,52.0,55.0,56.0,59.0,58.0]
             mass_gr_per_mol = [1.0079,4.0026,3.0160,12.0000,13.0034,14.0031,15.0001,15.9950, 16.9991,17.9992,20.1797,22.9898,24.3050,26.9815,28.0850,30.9738,32.0600,35.4500,39.9481,39.0983,40.0784,44.9559,47.8671,50.9415,51.9962,54.9380,55.8452,58.9332,58.6934]
-            eps = [np.sum(data[:,i+6]*m)/m_sum for i in range(len(elements))]
+            eps = [np.sum(data[:,i+6]*m_shell) for i in range(len(elements))]
             
         elif model == 'bs05_agsop':
             elements  = {0:'H',1:'He4',2:'He3',3:'C12',4:'N14',5:'O16'}
