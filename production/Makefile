@@ -13,4 +13,3 @@ $(TARGET): $(SRC)
 	$(CC) $(CFLAGS) $@.cc -o $@ $(INCDIR) $(LIBS)
 clean:
 	rm -rf $(TARGET) 
-	./$(patsubst %.out,%,$@) $(patsubst %.out,%.cmnd,$@) > $@
