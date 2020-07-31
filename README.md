@@ -1,7 +1,7 @@
 # χarον (charon)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![arXiv](https://img.shields.io/badge/arXiv-20xx.xxxxx%20-green.svg)](https://arxiv.org/abs/20xx.xxxxx)
+[![arXiv](https://img.shields.io/badge/arXiv-2007.15010%20-green.svg)](https://arxiv.org/abs/20xx.xxxxx)
 
 χarον is a package to organize calculations of neutrinos from dark matter annihilation/decay.
 
@@ -11,7 +11,7 @@
 Indirect detection which detects Standard Model (SM) particles produced by dark matter annihilation/decay is an important piece of current approaches searching for the dark matter. Stable particles from astrophysical sources are messengers of these indirect signals. Among messengers used in indirect searches for dark matter, neutrinos are special as they are neutral, light, and seldom interact. These unique properties give them advantages in astrophysical studies: they are advantageous over cosmic rays as they can point back to their sources and unlike gamma rays can exit environments of large matter and radiation densities. It is important to have a tool to organize the neutrino flux generation.
 
 ## Features
-* **Neutrino Flux at Production**: We provide neutrino fluxes at production using PYTHIA8.2 with electroweak corrections from [`BRW`](https://arxiv.org/abs/20xx.xxxxx) for DM mass larger than 500 GeV and the option to generate fluxes without EW corrections onself.
+* **Neutrino Flux at Production**: We provide neutrino fluxes at production using PYTHIA8.2 with electroweak corrections from [`BRW calculation`](https://arxiv.org/abs/2007.15001) for DM mass larger than 500 GeV and the option to generate fluxes without EW corrections onself.
     Things related to neutrino fluxes at productions are in the [`production`](production/) folder.  
 * **Neutrino Propagation**: Propagate initial fluxs to different locations. Tables of initial neutrino fluxes with and without electroweak correction are in [`charon/data`](charon/data/). When using χarον to propagate, the default is that when DM mass is smaller than 500 GeV the initial flux is without EW correction and when DM mass is larger than 500 GeV the initial flux has EW correction included.      
 * **DM Capture**: Some models of DM capture and annihilation rate calculation.  
@@ -65,8 +65,15 @@ You can find examples of how to run χaroν in the
 [`example`](example/) folder.
 
 ## Citation
-If you use χarον in published work, please cite:  
-preprint: arXiv:20xx.xxxxx.
+If you use χarον in published work, please cite:
+
+χaroν: a tool for neutrino flux generation from WIMPs
+
+Qinrui Liu, Jeffrey Lazar, Carlos A. Argüelles, Ali Kheirandish  
+
+preprint: [arXiv:2007.15010](https://arxiv.org/abs/2007.15010)
+
+
 
 
 ʕ•̫͡•ʕ•͓͡•ʔ-̫͡-ʕ•̫͡•ʔʔ-̫͡-ʔฅʕ•̫͡•ʕ•͓͡•ʔ-̫͡-ʕ•̫͡•ʔʔ-̫͡-ʔฅʕ•̫͡•ʕ•͓͡•ʔ-̫͡-ʕ•̫͡•ʔʔ-̫͡-ʔฅʕ•̫͡•ʕ•͓͡•ʔ-̫͡-ʕ•̫͡•ʔʔ-̫͡-ʔฅʕ•̫͡•ʕ•͓͡•ʔ-̫͡-ʕ•̫͡•ʔʔ-̫͡-ʔ
