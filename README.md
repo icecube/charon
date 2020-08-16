@@ -5,7 +5,7 @@
 
 χarον is a package to organize calculations of neutrinos from dark matter annihilation/decay.
 
-[χαρον](docs/source/logo.png)
+![χarον logo](docs/source/logo.png)
 
 ## Overview
 Indirect detection which detects Standard Model (SM) particles produced by dark matter annihilation/decay is an important piece of current approaches searching for the dark matter. Stable particles from astrophysical sources are messengers of these indirect signals. Among messengers used in indirect searches for dark matter, neutrinos are special as they are neutral, light, and seldom interact. These unique properties give them advantages in astrophysical studies: they are advantageous over cosmic rays as they can point back to their sources and unlike gamma rays can exit environments of large matter and radiation densities. It is important to have a tool to organize the neutrino flux generation.
