@@ -310,7 +310,7 @@ def IniFluxFunction(ch,DMm,process='ann',wimp_loc='Sun',path=None,secluded=False
     f   	 : 	list 
 				list of interpolation functions	of the initial flux for each flavor
 	"""	
-	p_mass = {'dd':4.7e-3,'uu':2.2e-3,'ss':95e-3,'cc':1.275,'tt':172.76,'bb':4.18,'WW':80.379,'tautau':1.776,'mumu':105e-3,'ee':0.511e-3,'gg':0.,'ZZ':91.1876,'HH':125.18} 
+	p_mass = {'dd':4.7e-3,'uu':2.2e-3,'ss':95e-3,'cc':1.275,'tt':172.76,'bb':4.18,'WW':80.379,'tautau':1.776,'mumu':105e-3,'ee':0.511e-3,'gg':0.,'ZZ':91.1876,'HH':125.18,'nuenue':0.,'nutaunutau':0.,'numunumu':0.,'gammagamma':0.} 
 	if secluded == False:
 		f = []
 		if path == None:	
