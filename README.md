@@ -73,6 +73,8 @@ Qinrui Liu, Jeffrey Lazar, Carlos A. Argüelles, Ali Kheirandish
 
 preprint: [arXiv:2007.15010](https://arxiv.org/abs/2007.15010)
 
+Published in: [JCAP 10 (2020), 043](https://iopscience.iop.org/article/10.1088/1475-7516/2020/10/043)
+
 
 
 
