@@ -31,15 +31,15 @@ class PhysicsConstants():
         #===============================================================================
         # ## MATH
         #===============================================================================
-        self.PI=3.14159265		            # Pi
-        self.PIby2=1.5707963268	            # Pi/2
-        self.sqr2=1.4142135624	            # Sqrt[2]
+        self.PI=3.14159265                  # Pi
+        self.PIby2=1.5707963268             # Pi/2
+        self.sqr2=1.4142135624              # Sqrt[2]
         self.ln2 = np.log(2.0)
         
         #===============================================================================
         # ## EARTH 
         #===============================================================================
-        self.EARTHRADIUS = 6371.0	        # [km] Earth radius
+        self.EARTHRADIUS = 6371.0           # [km] Earth radius
         #===============================================================================
         # ## SUN 
         #===============================================================================
@@ -48,8 +48,8 @@ class PhysicsConstants():
         #===============================================================================
         # # PHYSICAL CONSTANTS
         #===============================================================================
-        self.GF = 1.16639e-23	            # [eV^-2] Fermi Constant 
-        self.Na = 6.0221415e+23 		        # [mol cm^-3] Avogadro Number
+        self.GF = 1.16639e-23               # [eV^-2] Fermi Constant 
+        self.Na = 6.0221415e+23                 # [mol cm^-3] Avogadro Number
         self.sw_sq = 0.2312                  # [dimensionless] sin(th_weinberg) ^2
         self.G  = 6.67300e-11                # [m^3 kg^-1 s^-2]
         self.alpha = 1.0/137.0               # [dimensionless] fine-structure constant 
@@ -234,8 +234,8 @@ class PhysicsConstants():
         self.dcp[3] = self.delta3
         
         # SQUARED MASS DIFFERENCE
-        self.dm21sq = 7.50e-5	             # [eV^2]
-        self.dm31sq = 2.47e-3	             # [eV^2]
+        self.dm21sq = 7.50e-5                # [eV^2]
+        self.dm31sq = 2.47e-3                # [eV^2]
         self.dm32sq = -2.43e-3               # [eV^2]
         # STERILE 
         self.dm41sq = 0.0                    # [eV^2]
@@ -263,7 +263,7 @@ class PhysicsConstants():
         #===============================================================================
         # # PARTICLE MASSES
         #===============================================================================
-        self.muon_mass = 0.10565 	     # [GeV]
+        self.muon_mass = 0.10565         # [GeV]
         self.neutron_mass = 0.939565         # [GeV]
         self.proton_mass = 0.938272          # [GeV]
         self.electron_mass = 0.510998910e-3  # [GeV]
