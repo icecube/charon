@@ -22,7 +22,7 @@ To generate events, do
 
 For a fast secluded run, do
 ```
-./run_secluded.sh channel mass location Nevent bins lower_energy_bound binning_scale mediator_mass (seed)
+./run_secluded.sh channel mass location process Nevent mediator_mass (seed)
 ```
 It generates fluxes at densities from 0. to 155 g/cm^3. 
 
@@ -97,7 +97,7 @@ Files are saved in ./location/ with name channel_dm mass_location_process_binsca
 
 5-nutau_bar 
 
-The first column is energy is GeV. 
+The first column is x=E/Mdm, energies are all GeV. 
 
 Generated tables are in ../charon/data with 10000000 events without EW correction  
 
