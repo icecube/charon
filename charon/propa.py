@@ -6,7 +6,6 @@ import os, glob
 import sys
 import time
 import socket
-import warnings
 from copy import deepcopy
 
 import multiprocessing as multip
@@ -280,7 +279,7 @@ def xini_Earth(zenith, r):
 #################################Flux Packing#########################################
 
 
-def Pack(ch, DMm, mass_v, folder):
+def Pack(ch, DMm, mass_v, process, folder):
     r"""pack secluded fluxes to shape (len(x),len(densities)). The first density must be 0 which corresponds to vacuum case.
     Parameters
     ----------
@@ -299,20 +298,20 @@ def Pack(ch, DMm, mass_v, folder):
     for i in range(6):
         files = sorted(
             glob.glob(
-                folder + "{}_{:.1f}_{:.1f}_*_--{}.dat".format(ch, DMm, mass_v, i)
+                folder + "{}_{:.1f}_{:.1f}_{}_*_--{}.dat".format(ch, DMm, mass_v,process, i)
             ),
             key=lambda s: key(s),
         )
         flux_list[i] = []
         for j in files:
+            print j
             data = np.genfromtxt(j)
             flux_list[i] += list(data[:, 1])
         flux_list[flavor[i]] = np.transpose(
             np.array(flux_list[i]).reshape(len(files), len(data))
         )
-    energy = data[:, 0]
-    x_data = energy / float(DMm)
-    flux = np.zeros(
+    x_data = data[:, 0]
+    flux   = np.zeros(
         (len(data), len(files)),
         dtype=[
             ("x", "float"),
@@ -331,7 +330,7 @@ def Pack(ch, DMm, mass_v, folder):
     flux["rho"] = np.transpose(np.array([key(s) for s in files] * len(data))).reshape(
         len(data), len(files)
     )
-    np.save(folder + "{}_{:.1f}_{:.1f}.npy".format(ch, DMm, mass_v), flux)
+    np.save(folder + "{}_{:.1f}_{:.1f}_{}.npy".format(ch, DMm, mass_v, process), flux)
     return flux
 
 
@@ -384,22 +383,27 @@ def IniFluxFunction(
         "numunumu": 0.0,
         "gammagamma": 0.0,
     }
+    
+    if process == "ann":
+        factor = 1.0
+    elif process == "decay":
+        factor = 2.0
+   
     if secluded == False:
+        if DMm / factor < p_mass[ch]:
+            sys.exit("DM mass {} GeV is below the threshold of {} channel for {} process".format(DMm, ch, 'a decay' if process == 'decay' else 'an annihilation'))
+
         f = []
         if path == None:
-            if DMm >= 500.0:
+            if DMm / factor >= 500.0:
                 data = h5py.File(dirpath + "/data/SpectraEW.hdf5", "r")
                 print("Initial Flux Loading: " + dirpath + "/data/SpectraEW.hdf5")
-            elif DMm < 500.0:
+            elif DMm / factor < 500.0:
                 data = h5py.File(dirpath + "/data/Spectra_noEW.hdf5", "r")
                 print("Initial Flux Loading: " + dirpath + "/data/Spectra_noEW.hdf5")
             flux_data = data[wimp_loc][ch]
-            if process == "ann":
-                factor = 1.0
-            elif process == "decay":
-                factor = 2.0
-            mass = data["m"][:] * factor
-            x = data["x"][:] / factor
+            mass = data["m"][:] 
+            x = data["x"][:]   
             for k in range(6):
                 f.append(
                     interp2d(
@@ -416,7 +420,7 @@ def IniFluxFunction(
             print("Initial Flux Loading: " + path)
             for k in range(6):
                 f.append(
-                    interp1d(data[:, 0] / DMm, data[:, k + 1], fill_value="extrapolate")
+                    interp1d(data[:, 0], data[:, k + 1], fill_value="extrapolate")
                 )
         elif os.path.isdir(path):
             for k in range(6):
@@ -440,7 +444,7 @@ def IniFluxFunction(
                         data = np.genfromtxt(files)
                         print("Initial Flux Loading: " + files)
                     f.append(
-                        interp1d(data[:, 0] / DMm, data[:, 1], fill_value="extrapolate")
+                        interp1d(data[:, 0], data[:, 1], fill_value="extrapolate")
                     )
         return f
 
@@ -449,19 +453,19 @@ def IniFluxFunction(
             data = np.load(path)
             print("Initial Flux Loading: " + path)
         elif os.path.isdir(path):
-            if os.path.isfile(path + "/{}_{:.1f}_{:.1f}.npy".format(ch, DMm, mass_v)):
-                data = np.load(path + "/{}_{:.1f}_{:.1f}.npy".format(ch, DMm, mass_v))
+            if os.path.isfile(path + "/{}_{:.1f}_{:.1f}_{}.npy".format(ch, DMm, mass_v, process)):
+                data = np.load(path + "/{}_{:.1f}_{:.1f}_{}.npy".format(ch, DMm, mass_v, process))
                 print(
                     "Initial Flux Loading: "
                     + path
-                    + "/{}_{:.1f}_{:.1f}.npy".format(ch, DMm, mass_v)
+                    + "/{}_{:.1f}_{:.1f}_{}.npy".format(ch, DMm, mass_v, process)
                 )
             else:
-                data = Pack(ch, DMm, mass_v, path)
+                data = Pack(ch, DMm, mass_v, process, path)
                 print(
                     "Initial Flux Loading: "
                     + path
-                    + "/{}_{:.1f}_{:.1f}.npy".format(ch, DMm, mass_v)
+                    + "/{}_{:.1f}_{:.1f}_{}.npy".format(ch, DMm, mass_v, process)
                 )
 
         f = []
@@ -546,6 +550,13 @@ def IniFlux(
         "nu_tau": 16,
         "nu_tau_bar": -16,
     }
+    
+    if process == "ann":
+        factor = 1.0
+    elif process == "decay":
+        factor = 2.0
+    indices = np.where(Enu <= DMm / factor) #indices of kinematically allowed Enu values       
+
     if not secluded:
         flux = np.zeros(
             (len(Enu)),
@@ -568,16 +579,16 @@ def IniFlux(
         )
         if pathFlux == None:
             for k in flux.dtype.names:
-                flux[k] = f[nuflavor[k] - 1](Enu / DMm, DMm)
+                flux[k][indices] = factor * f[nuflavor[k] - 1](factor * Enu[indices] / DMm, DMm / factor)
         else:
             for k in flux.dtype.names:
-                flux[k] = f[nuflavor[k] - 1](Enu / DMm)
+                flux[k][indices] = factor * f[nuflavor[k] - 1](factor * Enu[indices] / DMm)
 
     elif secluded:
         f, f_vacuum = IniFluxFunction(
             ch,
             DMm,
-            process="decay",
+            process=process,
             wimp_loc=wimp_loc,
             path=pathFlux,
             secluded=secluded,
@@ -1246,7 +1257,7 @@ class NuFlux:
             self.params["Ein"],
             self.ch,
             self.DMm,
-            process="decay",
+            process=self.process,
             wimp_loc=wimp_loc,
             pathFlux=self.pathFlux,
             pathSunModel=self.pathSunModel,
