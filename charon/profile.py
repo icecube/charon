@@ -95,3 +95,12 @@ class J:
                 ]
             )
         )
+
+    def JAverage(self, theta_min, theta_max):
+        cos_min = np.cos(theta_max)
+        cos_max = np.cos(theta_min)
+        cos = np.linspace(cos_min, cos_max, 101)
+        cos_mid = (cos[1:] + cos[:-1]) / 2.0
+        diff = np.diff(cos)
+        Delta_Omega = 2 * np.pi * sum(diff)
+        return self.JIntegral(theta_min, theta_max) / Delta_Omega
