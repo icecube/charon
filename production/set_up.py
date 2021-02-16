@@ -65,6 +65,7 @@ code = {
     "numunumu": 14,
     "tautau": 15,
     "nutaunutau": 16,
+    "gammagamma": 22,
 }
 nu_number = {"nuenue": 0, "numunumu": 2, "nutaunutau": 4}
 
