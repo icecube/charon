@@ -359,6 +359,7 @@ def IniFluxFunction(
                         mediator_mass in GeV
     path             :  str
                         path to external file of the flux at production
+                        
     Returns
     -------
     f        :  list
@@ -398,12 +399,18 @@ def IniFluxFunction(
             if DMm / factor >= 500.0:
                 data = h5py.File(dirpath + "/data/SpectraEW.hdf5", "r")
                 print("Initial Flux Loading: " + dirpath + "/data/SpectraEW.hdf5")
+                mass = data["m"][:]
             elif DMm / factor < 500.0:
-                data = h5py.File(dirpath + "/data/Spectra_noEW.hdf5", "r")
-                print("Initial Flux Loading: " + dirpath + "/data/Spectra_noEW.hdf5")
+                data = h5py.File(dirpath + "/data/Spectra_PYTHIA.hdf5", "r")
+                print("Initial Flux Loading: " +  dirpath + "/data/Spectra_PYTHIA.hdf5")
+                mass = data["m"][:]
+                if (p_mass[ch] >= 1.0) & (ch not in ['HH','ZZ','WW']):
+                    mass = np.append(p_mass[ch], mass) 
+                    mass = np.sort(mass) 
+            
+            x = data["x"][:] 
             flux_data = data[wimp_loc][ch]
-            mass = data["m"][:] 
-            x = data["x"][:]   
+           
             for k in range(6):
                 f.append(
                     interp2d(

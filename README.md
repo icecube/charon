@@ -25,7 +25,7 @@ Indirect detection which detects Standard Model (SM) particles produced by dark 
 χaroν needs a modified version of nuSQuIDs which can be installed from 
   [`nuSQuIDS branch`](https://github.com/qrliu/nuSQuIDS) and please make sure python interface is activated.
 * Python
-* NumPy
+ NumPy
 * Scipy
 * SymPy
 * Astropy
@@ -47,7 +47,11 @@ cd ./charon/data/
 
 wget --no-check-certificate https://icecube.wisc.edu/~qliu/charon/SpectraEW.hdf5
 
-wget --no-check-certificate https://icecube.wisc.edu/~qliu/charon/Spectra_noEW.hdf5
+~~wget --no-check-certificate https://icecube.wisc.edu/~qliu/charon/SpectraEW.hdf5~~
+
+Update: Feb 16, 2021 (New PYTHIA tables generated with weakShower on)
+
+wget --no-check-certificate https://icecube.wisc.edu/~qliu/charon/Spectra_PYTHIA.hdf5
 
 cd ../../
 ``` 
