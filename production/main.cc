@@ -420,20 +420,19 @@ int main(int argc, char** argv) {
   string binscale     = string(argv[8]);
   float  lower_edge   = atof(argv[9]);
   string secluded     = string(argv[11]);
-
+  
   (void)argc;
   
   bool Log;
   if (binscale == "log") Log = true;
   else                   Log = false;
   
-  nuE     = Hist("electron neutrino spectrum",      nBinIn, lower_edge/xMaxIn,  1.+1e-10, Log);
-  nuEBar  = Hist("anti electron neutrino spectrum", nBinIn, lower_edge/xMaxIn,  1.+1e-10, Log);
-  nuMu    = Hist("muon neutrino spectrum",          nBinIn, lower_edge/xMaxIn,  1.+1e-10, Log);
-  nuMuBar = Hist("anti muon neutrino spectrum",     nBinIn, lower_edge/xMaxIn,  1.+1e-10, Log);
-  nuTau   = Hist("tau neutrino spectrum",           nBinIn, lower_edge/xMaxIn,  1.+1e-10, Log);
-  nuTauBar= Hist("anti tau neutrino spectrum",      nBinIn, lower_edge/xMaxIn,  1.+1e-10, Log);
-
+  nuE     = Hist("electron neutrino spectrum",      nBinIn, lower_edge/xMaxIn,  1.+1e-7, Log);
+  nuEBar  = Hist("anti electron neutrino spectrum", nBinIn, lower_edge/xMaxIn,  1.+1e-7, Log);
+  nuMu    = Hist("muon neutrino spectrum",          nBinIn, lower_edge/xMaxIn,  1.+1e-7, Log);
+  nuMuBar = Hist("anti muon neutrino spectrum",     nBinIn, lower_edge/xMaxIn,  1.+1e-7, Log);
+  nuTau   = Hist("tau neutrino spectrum",           nBinIn, lower_edge/xMaxIn,  1.+1e-7, Log);
+  nuTauBar= Hist("anti tau neutrino spectrum",      nBinIn, lower_edge/xMaxIn,  1.+1e-7, Log);
   
   if (secluded == "secluded")
     pythia.readFile("./cmnd/"+channel+"_"+argv[2]+"_"+argv[10]+"_"+process+".cmnd");
@@ -563,10 +562,10 @@ int main(int argc, char** argv) {
 
   double width;
   string yaxis; 
-  if (binscale == "log")  {width = (log10 (xMaxIn / xMaxIn) - log10 (lower_edge / xMaxIn)) / bin;
+  if (binscale == "log")  {width = (log10 (xMaxIn * (1. + 1e-7) / xMaxIn) - log10 (lower_edge / xMaxIn)) / bin;
                            yaxis = "$\\mathrm{d}N / \\mathrm{d}logx$"; 
   } 
-  else                    {width = (xMaxIn - lower_edge) / (xMaxIn * bin);
+  else                    {width = (xMaxIn * (1. + 1e-7) - lower_edge) / (xMaxIn * bin);
                            yaxis = "$\\mathrm{d}N / \\mathrm{d}x$"; 
   }
   nuE      *= 1. / (nEvent * width);
