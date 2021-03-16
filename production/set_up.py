@@ -98,6 +98,7 @@ f.write("Next:numberShowEvent = 1" + "\n")
 f.write("Beams:idA = -11" + "\n")
 f.write("Beams:idB = 11" + "\n")
 f.write("PDF:lepton = off" + "\n")
+f.write("Beams:frameType = 2" + "\n")
 
 
 if process_type == "secluded":
@@ -116,7 +117,6 @@ if process_type == "secluded":
    )
    eA = float(solution[0][y])
    eB = float(solution[0][x])
-   f.write("Beams:frameType = 2" + "\n")
    f.write("Beams:eA = " + str(eA) + "\n")
    f.write("Beams:eB = " + str(eB) + "\n")
    f.write(
@@ -125,15 +125,16 @@ if process_type == "secluded":
        + " 1. 0. 0. 0."
        + "\n"
    )
-
 else:
-    f.write("Beams:eCM = " + str(Ecm) + "\n")
-    f.write(
+   f.write("Beams:eA = " + str(Ecm/2.) + "\n")
+   f.write("Beams:eB = " + str(Ecm/2.) + "\n")
+   f.write(
         "999999:all = GeneralResonance void 1 0 0 "
         + str(Ecm)
         + " 1. 0. 0. 0."
         + "\n"
     )
+
 if code[channel] in [21, 22, 23, 25]:
     f.write(
         "999999:addChannel = 1 1.0 101 "
