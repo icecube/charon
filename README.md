@@ -41,7 +41,7 @@ unzip ./charon/xsec/xsec.zip -d charon/xsec/
 
 Data at production can be downloaded from https://icecube.wisc.edu/~qliu/charon/. The data are supposed to be put into [`charon/data/`](charon/data) before installation.
 
-***[Update: Feb 16, 2021: new PYTHIA tables generated with weakShower on. The file is named Spectra_PYTHIA now]***
+***[Update: March 16, 2021: new PYTHIA tables generated with weakShower on. The file is named Spectra_PYTHIA now]***
 
 ```
 mkdir ./charon/data/
