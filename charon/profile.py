@@ -63,7 +63,7 @@ class J:
     # def Jtheta(pro,theta,R,d,process = 'annihilation',**kwargs):
     def Jtheta(self, theta):
         # return jfactor with unit GeV^2/cm^5 for annihilation and GeV/cm^2 for decay
-        l = np.linspace(0.0, l_max(theta, self.R, self.d), 1001)
+        l = np.linspace(0.0, l_max(theta, self.R, self.d), 101)
         width = np.diff(l) * 3.0857e21
         center = (l[1:] + l[:-1]) / 2.0
         r_GC = r(theta, center, self.d)
