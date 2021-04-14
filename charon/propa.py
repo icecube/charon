@@ -404,9 +404,9 @@ def IniFluxFunction(
                 data = h5py.File(dirpath + "/data/Spectra_PYTHIA.hdf5", "r")
                 print("Initial Flux Loading: " +  dirpath + "/data/Spectra_PYTHIA.hdf5")
                 mass = data["m"][:]
-                if (p_mass[ch] >= 3.0) & (ch not in ['HH','ZZ','WW']):
+                if (p_mass[ch] >= 3.0):
                     mass = np.sort(np.append(p_mass[ch], mass))
-                mass = mass[mass >= max(3.0, p_mass[ch])]
+                mass = np.unique(mass[mass >= max(3.0, p_mass[ch])])
             
             x = data["x"][:] 
             flux_data = data[wimp_loc][ch]
