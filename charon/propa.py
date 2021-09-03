@@ -17,8 +17,11 @@ import sympy as sym
 from sympy import Symbol
 from sympy.solvers import solve
 
-import nuSQUIDSpy as nsq
-import nuSQUIDSTools
+# patch change in nuSQuIDS naming convention
+try:
+    import nuSQUIDSpy as nsq
+except ModuleNotFoundError:
+    import nuSQuIDS as nsq
 import physicsconstants as PC
 
 import astropy.units as u
