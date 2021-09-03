@@ -17,10 +17,6 @@ import sympy as sym
 from sympy import Symbol
 from sympy.solvers import solve
 
-import matplotlib as mpl
-
-if "cobalt" in socket.gethostname():
-    mpl.use("Agg", warn=False)
 import nuSQUIDSpy as nsq
 import nuSQUIDSTools
 import physicsconstants as PC
@@ -304,7 +300,7 @@ def Pack(ch, DMm, mass_v, process, folder):
         )
         flux_list[i] = []
         for j in files:
-            print j
+            print(j)
             data = np.genfromtxt(j)
             flux_list[i] += list(data[:, 1])
         flux_list[flavor[i]] = np.transpose(
