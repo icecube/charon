@@ -304,11 +304,7 @@ def Pack(ch, DMm, mass_v, process, folder):
         )
         flux_list[i] = []
         for j in files:
-<<<<<<< HEAD
             print (j)
-=======
-            print(j)
->>>>>>> aa1f3086fcfb53c08c70aca027c5fff89ae52edc
             data = np.genfromtxt(j)
             flux_list[i] += list(data[:, 1])
         flux_list[flavor[i]] = np.transpose(
@@ -854,25 +850,25 @@ def propagate(
 
     if xsec == None:
         try:
-            xsec = nsq.CrossSectionLibrary()
-            xsec.addTarget(nsq.PDGCode.proton,nsq.NeutrinoDISCrossSectionsFromTables(dirpath + "/xsec/nusigma_proton.h5"))
-            xsec.addTarget(nsq.PDGCode.neutron,nsq.NeutrinoDISCrossSectionsFromTables(dirpath + "/xsec/nusigma_neutron.h5"))
+            xsection = nsq.CrossSectionLibrary()
+            xsection.addTarget(nsq.PDGCode.proton,nsq.NeutrinoDISCrossSectionsFromTables(dirpath + "/xsec/nusigma_proton.h5"))
+            xsection.addTarget(nsq.PDGCode.neutron,nsq.NeutrinoDISCrossSectionsFromTables(dirpath + "/xsec/nusigma_neutron.h5"))
         except:
-            xsec = nsq.NeutrinoDISCrossSectionsFromTables(dirpath + "/xsec/nusigma_")
+            xsection = nsq.NeutrinoDISCrossSectionsFromTables(dirpath + "/xsec/nusigma_")
 
     else:
         try:
-            xsec = nsq.CrossSectionLibrary()
-            xsec.addTarget(nsq.PDGCode.proton,nsq.NeutrinoDISCrossSectionsFromTables(xsec + "_proton.h5"))
-            xsec.addTarget(nsq.PDGCode.neutron,nsq.NeutrinoDISCrossSectionsFromTables(xsec + "_neutron.h5"))
+            xsection = nsq.CrossSectionLibrary()
+            xsection.addTarget(nsq.PDGCode.proton,nsq.NeutrinoDISCrossSectionsFromTables(xsec + "_proton.h5"))
+            xsection.addTarget(nsq.PDGCode.neutron,nsq.NeutrinoDISCrossSectionsFromTables(xsec + "_neutron.h5"))
         except:
-            xsec = nsq.NeutrinoDISCrossSectionsFromTables(xsec)
+            xsection = nsq.NeutrinoDISCrossSectionsFromTables(xsec)
         else:
             sys.exit("Cross section tables cannot be read.")
 
-    xsec.addTarget(nsq.PDGCode.electron,nsq.GlashowResonanceCrossSection())
+    xsection.addTarget(nsq.PDGCode.electron,nsq.GlashowResonanceCrossSection())
    
-    nuSQ = nsq.nuSQUIDS(Ein * pc.GeV, 3, nsq.NeutrinoType.both, interactions, xsec)
+    nuSQ = nsq.nuSQUIDS(Ein * pc.GeV, 3, nsq.NeutrinoType.both, interactions, xsection)
 
     nuSQ.Set_IncludeOscillations(True)
     nuSQ.Set_MixingAngle(0, 1, np.deg2rad(theta_12))
