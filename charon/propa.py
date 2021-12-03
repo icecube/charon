@@ -21,8 +21,13 @@ import matplotlib as mpl
 
 if "cobalt" in socket.gethostname():
     mpl.use("Agg", warn=False)
-import nuSQUIDSpy as nsq
-import nuSQUIDSTools
+
+# patch change in nuSQuIDS naming convention
+try:
+            import nuSQUIDSpy as nsq
+except ModuleNotFoundError:
+            import nuSQuIDS as nsq
+
 import physicsconstants as PC
 
 import astropy.units as u
@@ -304,7 +309,7 @@ def Pack(ch, DMm, mass_v, process, folder):
         )
         flux_list[i] = []
         for j in files:
-            print j
+            print (j)
             data = np.genfromtxt(j)
             flux_list[i] += list(data[:, 1])
         flux_list[flavor[i]] = np.transpose(
@@ -847,13 +852,30 @@ def propagate(
         4: "nu_tau",
         5: "nu_tau_bar",
     }
-    if xsec == None:
-        xsec = nsq.NeutrinoDISCrossSectionsFromTables(dirpath + "/xsec/nusigma_")
-        nuSQ = nsq.nuSQUIDS(Ein * pc.GeV, 3, nsq.NeutrinoType.both, interactions, xsec)
-    else:
-        xsec = nsq.NeutrinoDISCrossSectionsFromTables(xsec)
-        nuSQ = nsq.nuSQUIDS(Ein * pc.GeV, 3, nsq.NeutrinoType.both, interactions, xsec)
 
+    if xsec == None:
+        try:
+            xsec = nsq.CrossSectionLibrary()
+            xsec.addTarget(nsq.PDGCode.proton,nsq.NeutrinoDISCrossSectionsFromTables(dirpath + "/xsec/nusigma_proton.h5"))
+            xsec.addTarget(nsq.PDGCode.neutron,nsq.NeutrinoDISCrossSectionsFromTables(dirpath + "/xsec/nusigma_neutron.h5"))
+        except:
+            xsec = nsq.NeutrinoDISCrossSectionsFromTables(dirpath + "/xsec/nusigma_")
+
+    else:
+        try:
+            xsec = nsq.CrossSectionLibrary()
+            xsec.addTarget(nsq.PDGCode.proton,nsq.NeutrinoDISCrossSectionsFromTables(xsec + "_proton.h5"))
+            xsec.addTarget(nsq.PDGCode.neutron,nsq.NeutrinoDISCrossSectionsFromTables(xsec + "_neutron.h5"))
+        except:
+            xsec = nsq.NeutrinoDISCrossSectionsFromTables(xsec)
+        else:
+            sys.exit("Cross section tables cannot be read.")
+
+    xsec.addTarget(nsq.PDGCode.electron,nsq.GlashowResonanceCrossSection())
+   
+    nuSQ = nsq.nuSQUIDS(Ein * pc.GeV, 3, nsq.NeutrinoType.both, interactions, xsec)
+
+    nuSQ.Set_IncludeOscillations(True)
     nuSQ.Set_MixingAngle(0, 1, np.deg2rad(theta_12))
     nuSQ.Set_MixingAngle(0, 2, np.deg2rad(theta_13))
     nuSQ.Set_MixingAngle(1, 2, np.deg2rad(theta_23))
@@ -863,7 +885,10 @@ def propagate(
     nuSQ.Set_rel_error(1.0e-10)
     nuSQ.Set_CPPhase(0, 2, np.deg2rad(delta))
     nuSQ.Set_ProgressBar(True)
-    nuSQ.Set_TauRegeneration(True)
+    if interactions:
+        nuSQ.Set_TauRegeneration(True)
+        nuSQ.Set_GlashowResonance(True)
+    
     flux_output = np.zeros(
         len(Eout),
         dtype=[
