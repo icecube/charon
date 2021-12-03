@@ -24,6 +24,7 @@ Indirect detection which detects Standard Model (SM) particles produced by dark 
 
 χaroν needs a modified version of nuSQuIDs which can be installed from 
   [`nuSQuIDS branch`](https://github.com/qrliu/nuSQuIDS) and please make sure python interface is activated.
+***[Update: Dec 3, 2021: [nuSQuIDS trunk](https://github.com/arguelles/nuSQuIDS/tree/v1.11-dev) is supported now.]***
 * Python
  NumPy
 * Scipy
