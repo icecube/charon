@@ -17,11 +17,6 @@ import sympy as sym
 from sympy import Symbol
 from sympy.solvers import solve
 
-import matplotlib as mpl
-
-if "cobalt" in socket.gethostname():
-    mpl.use("Agg", warn=False)
-
 # patch change in nuSQuIDS naming convention
 try:
             import nuSQUIDSpy as nsq
@@ -309,7 +304,11 @@ def Pack(ch, DMm, mass_v, process, folder):
         )
         flux_list[i] = []
         for j in files:
+<<<<<<< HEAD
             print (j)
+=======
+            print(j)
+>>>>>>> aa1f3086fcfb53c08c70aca027c5fff89ae52edc
             data = np.genfromtxt(j)
             flux_list[i] += list(data[:, 1])
         flux_list[flavor[i]] = np.transpose(
