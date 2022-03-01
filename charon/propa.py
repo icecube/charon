@@ -30,7 +30,9 @@ from astropy.time import Time
 
 import h5py
 
-dirpath = os.path.dirname(os.path.realpath(__file__))
+
+#dirpath = os.path.dirname(os.path.realpath(__file__))
+dirpath = "/data/user/qliu/charon/charon/"
 pc = PC.PhysicsConstants()
 
 flavor = {
@@ -102,6 +104,40 @@ def process(func, args, ncpu):
 
 
 ##############################Multiprocessing##################################
+
+#################################Boost#########################################
+
+def boost(E,DMm,mass_v,theta=0.):
+    r"""Boost the energy of products of the mediator decay to lab frame 
+
+    Parameters
+    ----------
+    E        :  float or narray.    
+                energy in rest frame of the mediator in GeV
+    DMm      :  float 
+                mass of DM  in GeV
+    mass_v   :  float 
+                mass of mediator in GeV
+    theta    :  float
+                angle between mediator moving direction and SM products moving direction in radian
+    Returns
+    -------
+    E_lab    :  list 
+                energy in lab frame with different angles in CM frame
+    dcosCM   :  array           
+                widths of angles in CM frame
+    """ 
+    gamma_v       = DMm/mass_v
+    beta_v        = np.sqrt(1.-((1./gamma_v)*(1./gamma_v)))
+    momenta       = E
+    cosCM         = np.linspace(-1.,1.,101)
+    dcosCM        = np.diff(cosCM)
+    cosCM         = (cosCM[1:]+cosCM[:-1])/2.
+    E_lab         = np.array([E*gamma_v*(1.+beta_v*i) for i in cosCM])
+    
+    return E_lab, dcosCM
+
+#################################Boost#########################################
 
 ##############################Sun/Earth Profile################################
 def Model(r, body, path=None):
@@ -337,6 +373,62 @@ def Pack(ch, DMm, mass_v, process, folder):
 #################################Flux Packing#########################################
 
 ###############################Initialize Flux#################################
+def LoadFlux(ch, DMm, process="ann"):
+    r"""Read Initial Flux and return interpolation functions
+    Parameters
+    ----------
+    ch               :  str
+                        Standard Model channel
+    DMm              :  float
+                        mass of DM in GeV
+   
+    Returns
+    -------
+    mass, data       :  array
+                        array of masses and corresponding data
+    """
+    p_mass = {
+        "dd": 4.7e-3,
+        "uu": 2.2e-3,
+        "ss": 95e-3,
+        "cc": 1.275,
+        "tt": 172.76,
+        "bb": 4.18,
+        "WW": 80.379,
+        "tautau": 1.776,
+        "mumu": 105e-3,
+        "ee": 0.511e-3,
+        "gg": 0.0,
+        "ZZ": 91.1876,
+        "HH": 125.18,
+        "nuenue": 0.0,
+        "nutaunutau": 0.0,
+        "numunumu": 0.0,
+        "gammagamma": 0.0,
+    }
+    
+    if process == "ann":
+        factor = 1.0
+    elif process == "decay":
+        factor = 2.0
+   
+   
+    if DMm / factor < p_mass[ch]:
+        sys.exit("DM mass {} GeV is below the threshold of {} channel for {} process".format(DMm, ch, 'a decay' if process == 'decay' else 'an annihilation'))
+
+    if DMm / factor >= 500.0:
+        data = h5py.File(dirpath + "/data/SpectraEW.hdf5", "r")
+        print("Initial Flux Loading: " + dirpath + "/data/SpectraEW.hdf5")
+        mass = data["m"][:]
+    elif DMm / factor < 500.0:
+        data = h5py.File(dirpath + "/data/Spectra_PYTHIA.hdf5", "r")
+        print("Initial Flux Loading: " +  dirpath + "/data/Spectra_PYTHIA.hdf5")
+        mass = data["m"][:]
+        if (p_mass[ch] >= 3.0):
+            mass = np.sort(np.append(p_mass[ch], mass))
+        mass = np.unique(mass[mass >= max(3.0, p_mass[ch])])
+    return mass, data 
+
 
 
 def IniFluxFunction(
@@ -365,52 +457,15 @@ def IniFluxFunction(
     f        :  list
                 list of interpolation functions of the initial flux for each flavor
     """
-    p_mass = {
-        "dd": 4.7e-3,
-        "uu": 2.2e-3,
-        "ss": 95e-3,
-        "cc": 1.275,
-        "tt": 172.76,
-        "bb": 4.18,
-        "WW": 80.379,
-        "tautau": 1.776,
-        "mumu": 105e-3,
-        "ee": 0.511e-3,
-        "gg": 0.0,
-        "ZZ": 91.1876,
-        "HH": 125.18,
-        "nuenue": 0.0,
-        "nutaunutau": 0.0,
-        "numunumu": 0.0,
-        "gammagamma": 0.0,
-    }
-    
-    if process == "ann":
-        factor = 1.0
-    elif process == "decay":
-        factor = 2.0
    
-    if secluded == False:
-        if DMm / factor < p_mass[ch]:
-            sys.exit("DM mass {} GeV is below the threshold of {} channel for {} process".format(DMm, ch, 'a decay' if process == 'decay' else 'an annihilation'))
-
+    if not secluded:
         f = []
-        if path == None:
-            if DMm / factor >= 500.0:
-                data = h5py.File(dirpath + "/data/SpectraEW.hdf5", "r")
-                print("Initial Flux Loading: " + dirpath + "/data/SpectraEW.hdf5")
-                mass = data["m"][:]
-            elif DMm / factor < 500.0:
-                data = h5py.File(dirpath + "/data/Spectra_PYTHIA.hdf5", "r")
-                print("Initial Flux Loading: " +  dirpath + "/data/Spectra_PYTHIA.hdf5")
-                mass = data["m"][:]
-                if (p_mass[ch] >= 3.0):
-                    mass = np.sort(np.append(p_mass[ch], mass))
-                mass = np.unique(mass[mass >= max(3.0, p_mass[ch])])
-            
+        if not path:
+            mass, data = LoadFlux(ch,DMm, process=process)
+        
             x = data["x"][:] 
-            flux_data = data[wimp_loc][ch]
-           
+            flux_data = data[wimp_loc][ch]         
+            
             for k in range(6):
                 f.append(
                     interp2d(
@@ -422,13 +477,15 @@ def IniFluxFunction(
                     )
                 )
             data.close()
+        
         elif os.path.isfile(path):
             data = np.genfromtxt(path)
             print("Initial Flux Loading: " + path)
             for k in range(6):
                 f.append(
-                    interp1d(data[:, 0], data[:, k + 1], fill_value="extrapolate")
+                interp1d(data[:, 0], data[:, k + 1], fill_value="extrapolate")
                 )
+        
         elif os.path.isdir(path):
             for k in range(6):
                 if (
@@ -454,11 +511,51 @@ def IniFluxFunction(
                         interp1d(data[:, 0], data[:, 1], fill_value="extrapolate")
                     )
         return f
-
-    elif secluded == True:
-        if os.path.isfile(path):
-            data = np.load(path)
+    
+    else:       
+        if not path:
+            loc_list = ['Halo','Earth','Sun']
+            mass, data = LoadFlux(ch,mass_v,process="decay")
+            xin = data['x'][:]
+            x   = xin / 2.
+            x   = np.append(x,xin[xin > 0.5])
+          
+            rhos = np.array([0.0,13.0885,148.9])
+            
+            flux_data = np.zeros((len(x),3),dtype=[
+                ("nu_e", "float"),
+                ("nu_mu", "float"),
+                ("nu_tau", "float"),
+                ("nu_e_bar", "float"),
+                ("nu_mu_bar", "float"),
+                ("nu_tau_bar", "float"),
+            ])
+             
+            
+            
+            for k in range(6):
+                for j in range(len(rhos)):
+                    flux_loc = data[loc_list[j]][ch]                 
+                    f_std = interp2d(
+                            xin,
+                            mass,
+                            flux_loc[:, k, :],
+                            bounds_error=False,
+                            kind="linear",
+                            )
+                    f_fitted  = 2 * f_std( xin, mass_v / 2.)
+                    f_fitted[f_fitted < 0] = 0.0
+                    f_fitted[-1] = 0.0                 
+                    flux_data[flavor[k]][:,j] = np.append(f_fitted,np.zeros(len(xin[xin > 0.5])))
+                    
+            data.close()
+            
+        elif os.path.isfile(path):
+            flux_data = np.load(path)
             print("Initial Flux Loading: " + path)
+            x        = flux_data["x"][:, 0] / mass_v
+            rhos     = flux_data["rho"][0]
+       
         elif os.path.isdir(path):
             if os.path.isfile(path + "/{}_{:.1f}_{:.1f}_{}.npy".format(ch, DMm, mass_v, process)):
                 data = np.load(path + "/{}_{:.1f}_{:.1f}_{}.npy".format(ch, DMm, mass_v, process))
@@ -468,34 +565,52 @@ def IniFluxFunction(
                     + "/{}_{:.1f}_{:.1f}_{}.npy".format(ch, DMm, mass_v, process)
                 )
             else:
-                data = Pack(ch, DMm, mass_v, process, path)
+                flux_data = Pack(ch, DMm, mass_v, process, path)
                 print(
                     "Initial Flux Loading: "
                     + path
                     + "/{}_{:.1f}_{:.1f}_{}.npy".format(ch, DMm, mass_v, process)
                 )
-
-        f = []
+           
+            x        = flux_data["x"][:, 0] / mass_v
+            rhos     = flux_data["rho"][0]
+            
+        f        = []
         f_vacuum = []
-        for k in range(6):
+
+        E_boost, dcosCM   = boost(x * mass_v, DMm, mass_v,theta=0.)
+
+
+        for k in range(6): 
+            boosted_grid = np.zeros((len(rhos),len(x)))
+            for rho in range(len(rhos)):
+                for l in range(len(E_boost[:,0])):
+                    fluxboost = np.zeros(len(x))
+                    A  = x * DMm / E_boost[l,:]
+                    interp = interp1d(E_boost[l,:] / DMm, 2 * np.pi * A * np.transpose(flux_data[flavor[k]][:, rho]) * abs(dcosCM[l]) / (4 * np.pi),fill_value='extrapolate')                 
+                    f_fitted = interp(x)
+                    f_fitted[f_fitted < 0] = 0.0
+                    boosted_grid[rho,:] += f_fitted
+      
+              
             f.append(
                 interp2d(
-                    data["x"][:, 0],
-                    data["rho"][0][1:],
-                    2.0 * np.transpose(data[flavor[k]][:, 1:]),
+                    x,
+                    rhos[1:],
+                    2 * boosted_grid[1:,:],
                     bounds_error=False,
                 )
             )
             f_vacuum.append(
                 interp1d(
-                    data["x"][:, 0],
-                    2.0 * data[flavor[k]][:, 0],
+                    x,
+                    2 * boosted_grid[0,:],
                     fill_value="extrapolate",
                 )
-            )
+            )    
         return f, f_vacuum
-
-
+        
+            
 def IniFlux(
     Enu,
     ch,
@@ -584,6 +699,7 @@ def IniFlux(
             path=pathFlux,
             secluded=secluded,
         )
+
         if pathFlux == None:
             for k in flux.dtype.names:
                 flux[k][indices] = factor * f[nuflavor[k] - 1](factor * Enu[indices] / DMm, DMm / factor)
@@ -850,25 +966,27 @@ def propagate(
 
     if xsec == None:
         try:
-            xsection = nsq.CrossSectionLibrary()
-            xsection.addTarget(nsq.PDGCode.proton,nsq.NeutrinoDISCrossSectionsFromTables(dirpath + "/xsec/nusigma_proton.h5"))
-            xsection.addTarget(nsq.PDGCode.neutron,nsq.NeutrinoDISCrossSectionsFromTables(dirpath + "/xsec/nusigma_neutron.h5"))
+            xsec = nsq.CrossSectionLibrary()
+            xsec.addTarget(nsq.PDGCode.proton,nsq.NeutrinoDISCrossSectionsFromTables(dirpath + "/xsec/nusigma_proton.h5"))
+            xsec.addTarget(nsq.PDGCode.neutron,nsq.NeutrinoDISCrossSectionsFromTables(dirpath + "/xsec/nusigma_neutron.h5"))
         except:
-            xsection = nsq.NeutrinoDISCrossSectionsFromTables(dirpath + "/xsec/nusigma_")
+            xsec = nsq.NeutrinoDISCrossSectionsFromTables(dirpath + "/xsec/nusigma_")
 
     else:
         try:
-            xsection = nsq.CrossSectionLibrary()
-            xsection.addTarget(nsq.PDGCode.proton,nsq.NeutrinoDISCrossSectionsFromTables(xsec + "_proton.h5"))
-            xsection.addTarget(nsq.PDGCode.neutron,nsq.NeutrinoDISCrossSectionsFromTables(xsec + "_neutron.h5"))
+            xsec = nsq.CrossSectionLibrary()
+            xsec.addTarget(nsq.PDGCode.proton,nsq.NeutrinoDISCrossSectionsFromTables(xsec + "_proton.h5"))
+            xsec.addTarget(nsq.PDGCode.neutron,nsq.NeutrinoDISCrossSectionsFromTables(xsec + "_neutron.h5"))
         except:
-            xsection = nsq.NeutrinoDISCrossSectionsFromTables(xsec)
+            xsec = nsq.NeutrinoDISCrossSectionsFromTables(xsec)
         else:
             sys.exit("Cross section tables cannot be read.")
 
-    xsection.addTarget(nsq.PDGCode.electron,nsq.GlashowResonanceCrossSection())
-   
-    nuSQ = nsq.nuSQUIDS(Ein * pc.GeV, 3, nsq.NeutrinoType.both, interactions, xsection)
+    xsec.addTarget(nsq.PDGCode.electron,nsq.GlashowResonanceCrossSection())
+    
+    
+    nuSQ = nsq.nuSQUIDS(Ein * pc.GeV, 3, nsq.NeutrinoType.both, interactions, xsec)
+    
 
     nuSQ.Set_IncludeOscillations(True)
     nuSQ.Set_MixingAngle(0, 1, np.deg2rad(theta_12))
