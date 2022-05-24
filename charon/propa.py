@@ -31,8 +31,7 @@ from astropy.time import Time
 import h5py
 
 
-#dirpath = os.path.dirname(os.path.realpath(__file__))
-dirpath = "/data/user/qliu/charon/charon/"
+dirpath = os.path.dirname(os.path.realpath(__file__))
 pc = PC.PhysicsConstants()
 
 flavor = {
