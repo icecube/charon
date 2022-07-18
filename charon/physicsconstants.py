@@ -73,7 +73,7 @@ class PhysicsConstants():
         self.year = 365.0*self.day           # [eV^-1/yr]
         self.yearstosec = self.sec/self.year # [s/yr]
         # Distance
-        self.meter = 5.06773093741e6         # [eV^-1/m]
+        self.meter = 806554.815355           # [eV^-1/m]
         self.cm = 1.0e-2*self.meter          # [eV^-1/cm]
         self.km = 1.0e3*self.meter           # [eV^-1/km]
         self.fermi = 1.0e-15*self.meter      # [eV^-1/fm]
