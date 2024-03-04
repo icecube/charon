@@ -377,7 +377,7 @@ def DMSunCaptureRateGould(
         n = len(elements)
 
     # input data
-    mass_eV = [m * pc.gr / pc.Na for m in mass_gr_per_mol]
+    mass_eV = np.array([m * pc.gr / pc.Na for m in mass_gr_per_mol])
     atom_radius = [(1.2 * np.power(A, 1.0 / 3.0) * pc.fermi) for A in mass_num]
 
     energy_element = [3.0 / (2.0 * mass_eV[i] * atom_radius[i] ** 2) for i in range(n)]
