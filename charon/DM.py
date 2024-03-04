@@ -758,4 +758,4 @@ def DMCaptureJungmanSD(DM_mass, DM_cs, DM_rho=0.3, vel_rot=270.0):
 
 def DMAnnihilationJungmanSD(DM_mass, DM_cs, DM_rho=0.3, vel_rot=270.0):
     """Calculate annihilation rate"""
-    return DMCaptureJungmanAX(DM_mass, DM_cs, DM_rho=DM_rho, vel_rot=vel_rot) / 2.0
+    return DMCaptureJungmanSD(DM_mass, DM_cs, DM_rho=DM_rho, vel_rot=vel_rot) / 2.0
