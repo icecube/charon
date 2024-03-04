@@ -8,9 +8,10 @@ import matplotlib as mpl
 import socket
 
 if "cobalt" in socket.gethostname():
-    mpl.use("Agg", warn=False)
+    mpl.use("Agg")
 import matplotlib.pyplot as plt
-import physicsconstants as PC
+from . import physicsconstants as PC
+
 
 pc = PC.PhysicsConstants()
 
