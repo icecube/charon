@@ -418,15 +418,16 @@ def LoadFlux(ch, DMm, process="ann"):
 
     sigma_value = 0.56    
     if DMm / factor >= 500.0:
-        
-        data = h5py.File(dirpath + "/data/SpectraEW.hdf5", "r")
-        print("Initial Flux Loading: " + f"Smoothed_SpectraEW_{sigma_value}.hdf5")
-        data = h5py.File(data_path + f"Smoothed_SpectraEW_{sigma_value}.hdf5", "r")
+        data_path = "/home/egenton/data_eg/charon_data_files/solar_wimp_analysis"
+        data = h5py.File(data_path + "/SpectraEW.hdf5", "r")
+        #print("Initial Flux Loading: " + f"Smoothed_SpectraEW_{sigma_value}.hdf5")
+        #data = h5py.File(data_path + f"Smoothed_SpectraEW_{sigma_value}.hdf5", "r")
         mass = data["m"][:]
     elif DMm / factor < 500.0:
-        data = h5py.File(dirpath + "/data/Spectra_PYTHIA.hdf5", "r")
-        print("Initial Flux Loading: " + f"Smoothed_Spectra_PYTHIA_{sigma_value}.hdf5")
-        data = h5py.File(data_path + f"Smoothed_Spectra_PYTHIA_{sigma_value}.hdf5", "r")
+        data_path = "/home/egenton/data_eg/charon_data_files/solar_wimp_analysis"
+        #data = h5py.File(dirpath + "/data/Spectra_PYTHIA.hdf5", "r")
+        
+        data = h5py.File(data_path + f"/Smoothed_Spectra_PYTHIA_{sigma_value}.hdf5", "r")
         mass = data["m"][:]
         if (p_mass[ch] >= 3.0):
             mass = np.sort(np.append(p_mass[ch], mass))
