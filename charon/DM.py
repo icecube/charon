@@ -732,7 +732,7 @@ def DMCaptureJungmanSD(DM_mass, DM_cs, DM_rho=0.3, vel_rot=270.0):
     vel_rot = vel_rot * pc.km / pc.sec  # local DM rel speed.
 
     mass_gr_per_mol = [1.0079]  # H   gr mol^-1
-    mass_eV = [m * pc.gr / pc.Na for m in mass_gr_per_mol]
+    mass_eV = np.array([m * pc.gr / pc.Na for m in mass_gr_per_mol])
 
     # sun
     v_escape = 1156.0 * pc.km * pc.sec ** -1
@@ -744,6 +744,9 @@ def DMCaptureJungmanSD(DM_mass, DM_cs, DM_rho=0.3, vel_rot=270.0):
         (A_aux(x) ** B_aux) / (1.0 + A_aux(x) ** B_aux)
     ) ** (1.0 / B_aux)
 
+    print("DM_mass:", DM_mass, type(DM_mass))
+    print("mass_eV:", mass_eV, type(mass_eV))
+    
     C_c = (
         (1.3e25 * pc.sec ** -1)
         * (DM_rho / (0.3 * pc.GeV / pc.cm ** 3))
@@ -752,6 +755,7 @@ def DMCaptureJungmanSD(DM_mass, DM_cs, DM_rho=0.3, vel_rot=270.0):
         * (DM_cs / (1.0e-40 * pc.cm ** 2))
         * kinematical_supression_factor(DM_mass / mass_eV)
     )
+    
 
     return C_c * pc.sec
 

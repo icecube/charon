@@ -23,7 +23,8 @@ try:
 except ModuleNotFoundError:
             import nuSQuIDS as nsq
 
-import physicsconstants as PC
+from . import physicsconstants as PC
+
 
 import astropy.units as u
 from astropy.time import Time
@@ -415,13 +416,17 @@ def LoadFlux(ch, DMm, process="ann"):
     if DMm / factor < p_mass[ch]:
         sys.exit("DM mass {} GeV is below the threshold of {} channel for {} process".format(DMm, ch, 'a decay' if process == 'decay' else 'an annihilation'))
 
+    sigma_value = 0.56    
     if DMm / factor >= 500.0:
+        
         data = h5py.File(dirpath + "/data/SpectraEW.hdf5", "r")
-        print("Initial Flux Loading: " + dirpath + "/data/SpectraEW.hdf5")
+        print("Initial Flux Loading: " + f"Smoothed_SpectraEW_{sigma_value}.hdf5")
+        data = h5py.File(data_path + f"Smoothed_SpectraEW_{sigma_value}.hdf5", "r")
         mass = data["m"][:]
     elif DMm / factor < 500.0:
         data = h5py.File(dirpath + "/data/Spectra_PYTHIA.hdf5", "r")
-        print("Initial Flux Loading: " +  dirpath + "/data/Spectra_PYTHIA.hdf5")
+        print("Initial Flux Loading: " + f"Smoothed_Spectra_PYTHIA_{sigma_value}.hdf5")
+        data = h5py.File(data_path + f"Smoothed_Spectra_PYTHIA_{sigma_value}.hdf5", "r")
         mass = data["m"][:]
         if (p_mass[ch] >= 3.0):
             mass = np.sort(np.append(p_mass[ch], mass))
@@ -457,7 +462,7 @@ def IniFluxFunction(
                 list of interpolation functions of the initial flux for each flavor
     """
    
-    if not secluded:
+    if not secluded: 
         f = []
         if not path:
             mass, data = LoadFlux(ch,DMm, process=process)
@@ -993,8 +998,8 @@ def propagate(
     nuSQ.Set_MixingAngle(1, 2, np.deg2rad(theta_23))
     nuSQ.Set_SquareMassDifference(1, delta_m_12)
     nuSQ.Set_SquareMassDifference(2, delta_m_13)
-    nuSQ.Set_abs_error(1.0e-10)
-    nuSQ.Set_rel_error(1.0e-10)
+    nuSQ.Set_abs_error(1.0e-11)
+    nuSQ.Set_rel_error(1.0e-11)
     nuSQ.Set_CPPhase(0, 2, np.deg2rad(delta))
     nuSQ.Set_ProgressBar(True)
     if interactions:
