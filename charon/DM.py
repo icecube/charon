@@ -651,7 +651,7 @@ def DMCaptureJungmanSI(DM_mass, DM_cs, location="Sun", DM_rho=0.3, vel_rot=270.0
         v_escape = 13.2 * pc.km * pc.sec ** -1
         c = 4.8e15
 
-    mass_eV = [m * pc.gr / pc.Na for m in mass_gr_per_mol]
+    mass_eV = np.array([m * pc.gr / pc.Na for m in mass_gr_per_mol])
     atom_radius = [(1.2 * np.power(A, 1.0 / 3.0) * pc.fermi) for A in mass_num]
     energy_element = [3.0 / (2.0 * mass_eV[i] * atom_radius[i] ** 2) for i in range(n)]
 
@@ -725,7 +725,7 @@ def DMCaptureJungmanSD(DM_mass, DM_cs, DM_rho=0.3, vel_rot=270.0):
     vel_rot = vel_rot * pc.km / pc.sec  # local DM rel speed.
 
     mass_gr_per_mol = [1.0079]  # H   gr mol^-1
-    mass_eV = [m * pc.gr / pc.Na for m in mass_gr_per_mol]
+    mass_eV = np.array([m * pc.gr / pc.Na for m in mass_gr_per_mol])
 
     # sun
     v_escape = 1156.0 * pc.km * pc.sec ** -1
