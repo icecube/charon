@@ -4,7 +4,7 @@ Author  : C.A. Arguelles,  Q.R. Liu
 import numpy as np
 import scipy.special as spe
 
-import .physicsconstants as PhysicsConstants
+from .physicsconstants import PhysicsConstants
 
 pc = PhysicsConstants()
 
