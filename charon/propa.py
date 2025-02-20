@@ -23,7 +23,7 @@ try:
 except ModuleNotFoundError:
             import nuSQuIDS as nsq
 
-import physicsconstants as PC
+from .physicsconstants import PhysicsConstants
 
 import astropy.units as u
 from astropy.time import Time
@@ -32,7 +32,7 @@ import h5py
 
 
 dirpath = os.path.dirname(os.path.realpath(__file__))
-pc = PC.PhysicsConstants()
+pc = PhysicsConstants()
 
 flavor = {
     0: "nu_e",
