@@ -3,16 +3,10 @@ Author  : C.A. Arguelles,  Q.R. Liu
 """
 import numpy as np
 import scipy.special as spe
-import scipy.interpolate as interpolate
-import matplotlib as mpl
-import socket
 
-if "cobalt" in socket.gethostname():
-    mpl.use("Agg", warn=False)
-import matplotlib.pyplot as plt
-import physicsconstants as PC
+import .physicsconstants as PhysicsConstants
 
-pc = PC.PhysicsConstants()
+pc = PhysicsConstants()
 
 
 def HelmFormFactor(q, A):
