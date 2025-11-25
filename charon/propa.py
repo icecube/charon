@@ -12,7 +12,7 @@ import multiprocessing as multip
 from functools import partial
 
 import numpy as np
-from scipy.interpolate import interp1d, interp2d
+from scipy.interpolate import interp1d,RegularGridInterpolator
 import sympy as sym
 from sympy import Symbol
 from sympy.solvers import solve
@@ -248,7 +248,7 @@ def Distance(zenith):
         x,
     )
     d_tot = [f for f in solution if f > 0][0]
-    d_earthatm = nsq.EarthAtm.Track(zenith)
+    d_earthatm = nsq.EarthAtm().MakeTrack(zenith)
     d_earthatm = d_earthatm.GetFinalX() / pc.km
     d_vacuum = d_tot - d_earthatm
     d = np.array([d_tot, d_vacuum, d_earthatm])
@@ -272,11 +272,12 @@ def xini_Sun(b, r, zenith):
                      array of [total distance, vacuum distance, atmosphere+earth distance]
     """
     R = pc.SUNRADIUS
-    l_tot_C = np.float(Distance(zenith)[0])  # Sun center to detector
+    l_tot_C = np.float64(Distance(zenith)[0])  # Sun center to detector
     d = np.sqrt(l_tot_C ** 2 - b ** 2)
     mid_l = np.sqrt(R ** 2 - b ** 2)
     mid_s = np.sqrt(r ** 2 - b ** 2)
-    d_earthatm = nsq.EarthAtm.Track(zenith)
+    #d_earthatm = nsq.EarthAtm.Track(zenith)
+    d_earthatm = nsq.EarthAtm().MakeTrack(zenith)
     d_earthatm = d_earthatm.GetFinalX() / pc.km
     if r < R:
         if b == 0:
@@ -467,12 +468,12 @@ def IniFluxFunction(
             
             for k in range(6):
                 f.append(
-                    interp2d(
-                        x,
-                        mass,
-                        flux_data[:, k, :],
+                    RegularGridInterpolator(
+                        (x,
+                        mass),
+                        flux_data[:, k, :].T,
                         bounds_error=False,
-                        kind="linear",
+                        fill_value=None,
                     )
                 )
             data.close()
@@ -511,8 +512,13 @@ def IniFluxFunction(
                     )
         return f
     
-    else:       
+    else: 
+        
+        f        = []
+        f_vacuum = []
+
         if not path:
+            print ("load")
             loc_list = ['Halo','Earth','Sun']
             mass, data = LoadFlux(ch,mass_v,process="decay")
             xin = data['x'][:]
@@ -531,83 +537,99 @@ def IniFluxFunction(
             ])
              
             
+            E_boost, dcosCM   = boost(x * mass_v, DMm, mass_v,theta=0.)
+            
+            boosted_grid = np.zeros((len(rhos),len(x)))
             
             for k in range(6):
                 for j in range(len(rhos)):
                     flux_loc = data[loc_list[j]][ch]                 
-                    f_std = interp2d(
-                            xin,
-                            mass,
-                            flux_loc[:, k, :],
+                    f_std = RegularGridInterpolator(
+                            (xin,
+                            mass),
+                            flux_loc[:, k, :].T,
                             bounds_error=False,
-                            kind="linear",
+                            fill_value=None,
                             )
-                    f_fitted  = 2 * f_std( xin, mass_v / 2.)
+                    xin_grid , mass_v_half_grid = np.meshgrid(xin, mass_v / 2.)
+                    f_fitted  = 2 * f_std((xin_grid, mass_v_half_grid))
                     f_fitted[f_fitted < 0] = 0.0
-                    f_fitted[-1] = 0.0                 
+                    #f_fitted[-1][-1] = 0.0                 
                     flux_data[flavor[k]][:,j] = np.append(f_fitted,np.zeros(len(xin[xin > 0.5])))
-                    
+                
+                    boosted_grid = np.zeros((len(rhos),len(x)))
+                
+                    for rho in range(len(rhos)):
+                        for l in range(len(E_boost[:,0])):
+                            fluxboost = np.zeros(len(x))
+                            A  = x * DMm / E_boost[l,:]
+                            interp = interp1d(E_boost[l,:] / DMm, 2 * np.pi * A * np.transpose(flux_data[flavor[k]][:, rho]) * abs(dcosCM[l]) / (4 * np.pi),fill_value='extrapolate')                 
+                            f_fitted = interp(x)
+                            f_fitted[f_fitted < 0] = 0.0
+                            boosted_grid[rho,:] += f_fitted
+
+                f.append(
+                    RegularGridInterpolator(
+                        (x,
+                        rhos[1:]),
+                        2 * boosted_grid[1:,:].T,
+                        bounds_error=False,
+                        fill_value=None,
+                        )
+                    )
+                f_vacuum.append(
+                    interp1d(
+                        x,
+                        2 * boosted_grid[0,:],
+                        fill_value="extrapolate",
+                    )
+                )    
+            
             data.close()
             
-        elif os.path.isfile(path):
-            flux_data = np.load(path)
-            print("Initial Flux Loading: " + path)
-            x        = flux_data["x"][:, 0] / mass_v
-            rhos     = flux_data["rho"][0]
-       
-        elif os.path.isdir(path):
-            if os.path.isfile(path + "/{}_{:.1f}_{:.1f}_{}.npy".format(ch, DMm, mass_v, process)):
-                data = np.load(path + "/{}_{:.1f}_{:.1f}_{}.npy".format(ch, DMm, mass_v, process))
-                print(
-                    "Initial Flux Loading: "
-                    + path
-                    + "/{}_{:.1f}_{:.1f}_{}.npy".format(ch, DMm, mass_v, process)
-                )
-            else:
-                flux_data = Pack(ch, DMm, mass_v, process, path)
-                print(
-                    "Initial Flux Loading: "
-                    + path
-                    + "/{}_{:.1f}_{:.1f}_{}.npy".format(ch, DMm, mass_v, process)
-                )
-           
-            x        = flux_data["x"][:, 0] / mass_v
-            rhos     = flux_data["rho"][0]
+            return f, f_vacuum
             
-        f        = []
-        f_vacuum = []
-
-        E_boost, dcosCM   = boost(x * mass_v, DMm, mass_v,theta=0.)
-
-
-        for k in range(6): 
-            boosted_grid = np.zeros((len(rhos),len(x)))
-            for rho in range(len(rhos)):
-                for l in range(len(E_boost[:,0])):
-                    fluxboost = np.zeros(len(x))
-                    A  = x * DMm / E_boost[l,:]
-                    interp = interp1d(E_boost[l,:] / DMm, 2 * np.pi * A * np.transpose(flux_data[flavor[k]][:, rho]) * abs(dcosCM[l]) / (4 * np.pi),fill_value='extrapolate')                 
-                    f_fitted = interp(x)
-                    f_fitted[f_fitted < 0] = 0.0
-                    boosted_grid[rho,:] += f_fitted
-      
-              
-            f.append(
-                interp2d(
-                    x,
-                    rhos[1:],
-                    2 * boosted_grid[1:,:],
-                    bounds_error=False,
+        else:
+            if os.path.isfile(path):
+                flux_data = np.load(path)
+                print("Initial Flux Loading: " + path)
+       
+            elif os.path.isdir(path):
+                if os.path.isfile(path + "/{}_{:.1f}_{:.1f}_{}.npy".format(ch, DMm, mass_v, process)):
+                    flux_data = np.load(path + "/{}_{:.1f}_{:.1f}_{}.npy".format(ch, DMm, mass_v, process))
+                    print(
+                        "Initial Flux Loading: "
+                        + path
+                        + "/{}_{:.1f}_{:.1f}_{}.npy".format(ch, DMm, mass_v, process)
+                    )
+                else:
+                    flux_data = Pack(ch, DMm, mass_v, process, path)
+                    print(
+                        "Initial Flux Loading: "
+                        + path
+                        + "/{}_{:.1f}_{:.1f}_{}.npy".format(ch, DMm, mass_v, process)
+                    )
+            x        = flux_data["x"][:, 0] 
+            rhos     = flux_data["rho"][0]
+        
+            for k in range(6): 
+                f.append(
+                    RegularGridInterpolator(
+                        (x,
+                        rhos[1:]),
+                        2 * flux_data[flavor[k]][:,1:],
+                        bounds_error=False,
+                        fill_value=None,
+                    )
                 )
-            )
-            f_vacuum.append(
-                interp1d(
-                    x,
-                    2 * boosted_grid[0,:],
-                    fill_value="extrapolate",
-                )
-            )    
-        return f, f_vacuum
+                f_vacuum.append(
+                    interp1d(
+                        x,
+                        2 * flux_data[flavor[k]][:, 0],
+                        fill_value="extrapolate",
+                    )
+                )    
+            return f, f_vacuum
         
             
 def IniFlux(
@@ -677,6 +699,7 @@ def IniFlux(
     elif process == "decay":
         factor = 2.0
     indices = np.where(Enu <= DMm / factor) #indices of kinematically allowed Enu values       
+    Enu_ratio = Enu / DMm
 
     if not secluded:
         flux = np.zeros(
@@ -701,10 +724,10 @@ def IniFlux(
 
         if pathFlux == None:
             for k in flux.dtype.names:
-                flux[k][indices] = factor * f[nuflavor[k] - 1](factor * Enu[indices] / DMm, DMm / factor)
+                flux[k][indices] = factor * f[nuflavor[k] - 1]((factor * Enu_ratio[indices],DMm / factor))
         else:
             for k in flux.dtype.names:
-                flux[k][indices] = factor * f[nuflavor[k] - 1](factor * Enu[indices] / DMm)
+                flux[k][indices] = factor * f[nuflavor[k] - 1](factor * Enu_ratio[indices])
 
     elif secluded:
         f, f_vacuum = IniFluxFunction(
@@ -735,7 +758,8 @@ def IniFlux(
             elif wimp_loc == "Earth":
                 rho = np.array([Model(i, wimp_loc, path=pathEarthModel) for i in r])
             if len(rho[rho > 0.0]) > 1:
-                flux_in = np.flip(f[nuflavor[k] - 1](Enu / DMm, rho[rho > 0.0]), axis=0)
+                Enu_ratio_grid, rho_grid = np.meshgrid(Enu_ratio, rho[rho > 0.0])
+                flux_in = f[nuflavor[k] - 1]((Enu_ratio_grid,rho_grid))
             elif len(rho[rho > 0.0]) == 1:
                 flux_in = f[nuflavor[k] - 1](Enu / DMm, rho[rho > 0.0])
             else:
@@ -962,15 +986,9 @@ def propagate(
         4: "nu_tau",
         5: "nu_tau_bar",
     }
-
+    
     if xsec == None:
-        try:
-            xsec = nsq.CrossSectionLibrary()
-            xsec.addTarget(nsq.PDGCode.proton,nsq.NeutrinoDISCrossSectionsFromTables(dirpath + "/xsec/nusigma_proton.h5"))
-            xsec.addTarget(nsq.PDGCode.neutron,nsq.NeutrinoDISCrossSectionsFromTables(dirpath + "/xsec/nusigma_neutron.h5"))
-        except:
-            xsec = nsq.NeutrinoDISCrossSectionsFromTables(dirpath + "/xsec/nusigma_")
-
+        nuSQ = nsq.nuSQUIDS(Ein * pc.GeV, 3, nsq.NeutrinoType.both, interactions)
     else:
         try:
             xsec = nsq.CrossSectionLibrary()
@@ -981,12 +999,9 @@ def propagate(
         else:
             sys.exit("Cross section tables cannot be read.")
 
-    xsec.addTarget(nsq.PDGCode.electron,nsq.GlashowResonanceCrossSection())
+        xsec.addTarget(nsq.PDGCode.electron,nsq.GlashowResonanceCrossSection())
+        nuSQ = nsq.nuSQUIDS(Ein * pc.GeV, 3, nsq.NeutrinoType.both, interactions, xsec)
     
-    
-    nuSQ = nsq.nuSQUIDS(Ein * pc.GeV, 3, nsq.NeutrinoType.both, interactions, xsec)
-    
-
     nuSQ.Set_IncludeOscillations(True)
     nuSQ.Set_MixingAngle(0, 1, np.deg2rad(theta_12))
     nuSQ.Set_MixingAngle(0, 2, np.deg2rad(theta_13))
@@ -1046,7 +1061,7 @@ def propagate(
                     nuSQ.Set_Body(nsq.EarthAtm())
                 else:
                     nuSQ.Set_Body(nsq.EarthAtm(pathEarthModel))
-                nuSQ.Set_Track(nsq.EarthAtm.Track(zenith))
+                nuSQ.Set_Track(nsq.EarthAtm().MakeTrack(zenith))
                 nuSQ.EvolveState()
 
         # from Earth
@@ -1110,7 +1125,6 @@ def propagate(
                     nuSQ.Set_Body(nsq.Earth())
                 else:
                     nuSQ.Set_Body(nsq.Earth(pathEarthModel))
-                # nuSQ.Set_Body(nsq.Earth())
                 nuSQ.Set_Track(
                     nsq.Earth.Track(2 * abs(np.cos(zenith)) * pc.EARTHRADIUS * pc.km)
                 )
@@ -1154,7 +1168,6 @@ def propagate(
                     else:
                         nuSQ.Set_Body(nsq.Sun(pathSunModel))
                     nuSQ.Set_Track(nsq.Sun.Track(xini * pc.km, pc.SUNRADIUS * pc.km))
-
                 nuSQ.Set_initial_state(iniflux, nsq.Basis.flavor)
                 nuSQ.EvolveState()
 
@@ -1190,7 +1203,7 @@ def propagate(
                     nuSQ.Set_Body(nsq.EarthAtm())
                 else:
                     nuSQ.Set_Body(nsq.EarthAtm(pathEarthModel))
-                nuSQ.Set_Track(nsq.EarthAtm.Track(zenith))
+                nuSQ.Set_Track(nsq.EarthAtm().MakeTrack(zenith))
                 nuSQ.EvolveState()
 
         # from the Earth
@@ -1414,6 +1427,8 @@ class NuFlux:
     def ini_flux(self, wimp_loc):
         r"""initial flux in the form that nuSQuIDs can read"""
         iniflux = self.iniFlux(wimp_loc)
+        for field_name in iniflux.dtype.names:
+            iniflux[field_name][iniflux[field_name] < 0] = 0  ###don't allow negative fluxes due to extrapolation
         initial_flux = np.zeros((self.nodes, 2, 3))
         for i in range(3):
             initial_flux[:, 0, i] = iniflux[self.flavor_list[i * 2]]
@@ -1423,6 +1438,8 @@ class NuFlux:
     def ini_flux_secluded(self, wimp_loc, mass_v, r):
         r"""initial flux in the form that nuSQuIDs can read"""
         iniflux = self.iniFlux_secluded(wimp_loc, mass_v, r)
+        for field_name in iniflux.dtype.names:
+            iniflux[field_name][iniflux[field_name] < 0] = 0  ###don't allow negative fluxes due to extrapolation
         if type(r) == float:
             r = np.array([r])
         initial_flux = np.zeros((len(r), self.nodes, 2, 3))
@@ -1552,7 +1569,7 @@ class NuFlux:
             zenith = SunZenith(time, latitude)
         else:
             zenith = zenith
-
+        
         ss_params = deepcopy(self.params)
         ss_params["location_ini"] = "Sun"
         ss_params["location_end"] = location_end
