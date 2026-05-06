@@ -19,6 +19,7 @@ To generate events, do
 ./run.sh channel mass location process type Nevent bins lower_energy_bound binning_scale
 (density mediator_mass seed) 
 ```
+The 'density' parameter is needed if the location is custom. Both the 'density' and 'mediator_mass' parameters are needed if computing the secluded scenario. The seed parameter comes always the last. 
 
 For a fast secluded run, do
 ```
@@ -38,7 +39,7 @@ DM mass in GeV.
 
 
 --location <br/>
-location of the DM annihilation. Available: "Sun", "Earth", "Halo" 
+location of the DM annihilation. Available: "Sun", "Earth", "Halo","custom"
 
 
 --process  <br/>
@@ -66,15 +67,12 @@ bin the spectrum in linear ("-") or log ("log") scale
 If the type is "secluded", we need to specify the density and mediator mass at the location of decay.
 
 
-**Parameters for secluded**
-
-
--- density (g/cm^3) <br/>
-density of the annihilation/decay location. 
+-- density (g/cm^3)  <br/>
+density of the annihilation/decay location for a customized location and secluded DM.
 
 
 -- mediator_mass (GeV) <br/>
-mass of the mediator.
+mass of the mediator for secluded DM
 
 
 The last is an optional parameter 
