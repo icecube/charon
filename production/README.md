@@ -19,7 +19,7 @@ To generate events, do
 ./run.sh channel mass location process type Nevent bins lower_energy_bound binning_scale
 (density mediator_mass seed) 
 ```
-The 'density' parameter is needed if the location is custom. Both the 'density' and 'mediator_mass' parameters are needed if computing the secluded scenario. The 'seed' parameter comes always the last. 
+The 'density' parameter is needed if the location is custom. Both the 'density' and 'mediator_mass' parameters are needed if computing the secluded scenario. The 'seed' parameter always comes the last and is optional. Please do not pass 'density' and 'mediator mass' values if the location is "Sun", "Earth" or "Halo".  
 
 For a fast secluded run, do
 ```
@@ -39,7 +39,7 @@ DM mass in GeV.
 
 
 --location <br/>
-location of the DM annihilation. Available: "Sun", "Earth", "Halo", "custom"
+location of the DM annihilation. Available: "Sun", "Earth", "Halo". If not the three, it will generate the fluxes for the custom location. In this case, this parameter can be any self-defined name of the location. 
 
 
 --process  <br/>
