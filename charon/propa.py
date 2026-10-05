@@ -1314,6 +1314,41 @@ def Probability_length(xini, xend, decayLength_v):
 ###########################main propagtion functions###########################
 
 ##############################Generate fluxes##################################
+def refine_endpoint(E, Eend, ratio=1.05, gap=1e-5):
+    r"""Refine an energy grid geometrically toward the kinematic endpoint Eend.
+
+    IniFlux samples dN/dx at the grid nodes, so a neutrino line (a spike ~1e-3 wide in
+    x = E/m at Eend in the EW tables) is only represented correctly if the nodes resolve it;
+    on a coarse grid the top node stands for a whole interval and the line is overcounted
+    by roughly that interval's width over the spike's. Base nodes are kept while they are
+    finer than the geometric step (Eend - E)(1 - 1/ratio); above that the nodes are
+    Eend - (Eend - E_k) ratio^-n down to a relative gap `gap`, followed by a node exactly
+    at Eend (so the `Enu <= DMm` cut can no longer drop it, issue #11) and any base nodes
+    above Eend.
+
+    Parameters
+    ----------
+    E        :  array
+                increasing energy grid
+    Eend     :  float
+                kinematic endpoint (DMm for annihilation, DMm / 2 for decay)
+    ratio    :  float or None
+                step ratio of the refined nodes; None returns E unchanged
+    gap      :  float
+                smallest (Eend - E) / Eend before the endpoint node
+    """
+    if ratio is None or not E[0] < Eend <= E[-1] * (1 + 1e-12):
+        return E
+    keep = [E[0]]
+    for e in E[1:]:
+        if e >= Eend or e - keep[-1] > (Eend - keep[-1]) * (1 - 1 / ratio):
+            break
+        keep.append(e)
+    n = max(int(np.log((Eend - keep[-1]) / (gap * Eend)) / np.log(ratio)), 0)
+    tail = Eend - (Eend - keep[-1]) * ratio ** -np.arange(1.0, n + 1)
+    return np.concatenate([keep, tail, [Eend], E[E > Eend * (1 + 1e-12)]])
+
+
 class NuFlux:
     def __init__(
         self,
@@ -1336,6 +1371,8 @@ class NuFlux:
         pathFlux=None,
         pathSunModel=None,
         pathEarthModel=None,
+        refine_ratio=1.05,
+        refine_gap=1e-5,
     ):
         self.flavor_list = {
             0: "nu_e",
@@ -1364,10 +1401,16 @@ class NuFlux:
 
         if logscale is True:
             self.e_vector = np.logspace(np.log10(Emin), np.log10(Emax), nodes)
-            self.e_center = np.logspace(np.log10(Emin), np.log10(Emax), bins)
+            self.e_center = np.logspace(np.log10(Emin), np.log10(Emax), self.bins)
         else:
             self.e_vector = np.linspace(Emin, Emax, nodes)
-            self.e_center = np.linspace(Emin, Emax, bins)
+            self.e_center = np.linspace(Emin, Emax, self.bins)
+
+        # resolve the spectrum at the kinematic endpoint (neutrino lines)
+        Eend = DMm / (2.0 if process == "decay" else 1.0)
+        self.e_vector = refine_endpoint(self.e_vector, Eend, refine_ratio, refine_gap)
+        self.e_center = refine_endpoint(self.e_center, Eend, refine_ratio, refine_gap)
+        self.nodes, self.bins = len(self.e_vector), len(self.e_center)
 
         self.params = {}
         self.params["Ein"] = self.e_vector
